@@ -28,7 +28,7 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 ```text
 0 Setup → 1 Python basics → 2 Backend + database → 3 Login → 4 Chat with fake answers
 → 5 Prepare the library ⭐ → 6 Search ⭐ → 7 AI answers ⭐ → 8 Trust UI
-→ 9 Evals ⭐ → 10 Go live → 11 Flutter client → 12 Portfolio
+→ 9 Evals ⭐ → 10 Go live → 11 Portfolio
 ```
 
 ⭐ = AI engineering, the part you're here to master. Go slow there.
@@ -357,26 +357,7 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 
 ---
 
-## Phase 11 — Flutter client (our addition)
-
-**Goal:** the same backend, now with a Flutter app. This is your home turf.
-
-- [ ] ✍️ Login with Supabase in Flutter
-- [ ] ✍️ Stream answers from `POST /chat/stream`
-- [ ] ✍️ Show citations and the source passage
-
-**Learn:**
-
-- **One backend, many clients:** a good API doesn't care whether React Native or Flutter is calling it.
-- **Reading an AI stream in Dart:** turning the streamed pieces into text on screen as they arrive.
-
-**Explain it back:**
-
-- What did the backend need to change to support a second app? (Ideally nothing.)
-
----
-
-## Phase 12 — Portfolio
+## Phase 11 — Portfolio
 
 **Goal:** someone can understand your project in 2 minutes.
 
