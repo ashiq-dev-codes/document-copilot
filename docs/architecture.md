@@ -4,7 +4,7 @@
 
 Document Copilot is an internal research assistant for analysts who need grounded answers from a curated SEC filing corpus. The architecture must optimize for trust: every answer is generated from retrieved source passages, every factual claim is citable, and the system fails clearly when the corpus does not support an answer.
 
-This document describes the target architecture for the chat experience, LLM orchestration, and the communication layer between the React SPA, Supabase, and FastAPI backend.
+This document describes the target architecture for the chat experience, LLM orchestration, and the communication layer between the React Native app, Supabase, and FastAPI backend.
 
 ## High-Level Architecture
 
@@ -12,10 +12,10 @@ The best opening diagram is a service-level view that shows the two core paths: 
 
 ```mermaid
 flowchart LR
-    user[Analyst] --> browser[Browser<br/>React chat app]
+    user[Analyst] --> app[Mobile app<br/>React Native + Expo]
+    eas[Expo EAS<br/>app builds] -->|installs app| app
 
     subgraph railway[Railway]
-        frontend[Frontend service<br/>Vite build]
         backend[Backend service<br/>FastAPI + PydanticAI]
     end
 
@@ -28,14 +28,13 @@ flowchart LR
     corpus[SEC filing corpus]
     ingestion[Ingestion pipeline<br/>download, parse, chunk, embed]
 
-    frontend -->|serves app| browser
-    browser -->|sign in| auth
-    auth -->|JWT session| browser
-    browser -->|chat request + JWT| backend
+    app -->|sign in| auth
+    auth -->|JWT session| app
+    app -->|chat request + JWT| backend
     backend -->|verify user| auth
     backend -->|retrieve passages<br/>persist chats + citations| db
     backend -->|generate grounded answer| openai
-    backend -->|stream answer + citations| browser
+    backend -->|stream answer + citations| app
 
     corpus --> ingestion
     ingestion -->|create embeddings| openai
@@ -44,22 +43,22 @@ flowchart LR
 
 ## Architectural Goals
 
-- Keep the browser thin: it renders chat state, manages the user's Supabase session, and streams assistant responses.
+- Keep the app thin: it renders chat state, manages the user's Supabase session, and streams assistant responses.
 - Keep the backend authoritative: retrieval, grounding, citation checks, tool execution, and database writes happen in FastAPI.
 - Use Supabase for identity and durable product state: users, chat threads, source documents, chunks, embeddings, and citation metadata.
 - Use Supabase `pgvector` for semantic retrieval and Postgres full-text search for keyword retrieval.
 - Make the LLM path typed and testable by using PydanticAI agents with explicit dependencies, outputs, and tool boundaries.
-- Preserve a simple deployment model on Railway: one frontend service, one stateless backend service, and hosted Supabase.
+- Preserve a simple deployment model: one stateless backend service on Railway, hosted Supabase, and the app built and shipped with Expo (EAS).
 
 ## Stack
 
 Frontend:
 
-- Vite + React SPA + TypeScript
-- React Router for routing
-- Tailwind CSS and shadcn/ui for UI
-- `@supabase/supabase-js` for browser auth
-- Vercel AI SDK UI packages for chat state and streaming client behavior
+- React Native + Expo + TypeScript
+- Expo Router for navigation
+- React Native core components and `StyleSheet` for UI
+- `@supabase/supabase-js` for auth, with the session stored on the device
+- Vercel AI SDK UI packages for chat state and streaming client behavior, using `expo/fetch` for streamed responses
 
 Backend:
 
@@ -86,32 +85,32 @@ The frontend is responsible for user interaction, local UI state, and sending th
 
 The backend is responsible for request authorization, retrieval, prompt construction, LLM execution, citation validation, streaming responses, and durable persistence. It owns all privileged credentials and is the only service allowed to use the Supabase service-role key.
 
-Supabase is responsible for authentication and durable product state. Browser access uses the anon key and user JWT. Server access uses either the user's bearer token for user-scoped operations or the service-role key for privileged writes that must still be explicitly tied to the authenticated user.
+Supabase is responsible for authentication and durable product state. App access uses the anon key and user JWT. Server access uses either the user's bearer token for user-scoped operations or the service-role key for privileged writes that must still be explicitly tied to the authenticated user.
 
 ## Request Flow
 
-1. The user signs in with Supabase email auth in the React SPA.
-2. The frontend stores the Supabase session through `@supabase/supabase-js`.
+1. The user signs in with Supabase email auth in the React Native app.
+2. The app stores the Supabase session on the device through `@supabase/supabase-js`.
 3. When the user opens a chat, the frontend loads the thread and prior messages through FastAPI, which reads user-scoped records from Supabase.
 4. The chat UI uses the Vercel AI SDK React primitives to manage message state and submit new user messages to the FastAPI chat endpoint.
 5. The frontend sends the Supabase access token as `Authorization: Bearer <token>`.
 6. FastAPI verifies the token with Supabase Auth before doing any retrieval or LLM work.
 7. FastAPI creates a request-scoped context containing the authenticated user, chat thread, Supabase client, retrieval service, citation policy, and LLM settings.
 8. A PydanticAI agent retrieves relevant document chunks, generates a grounded answer, and returns typed output containing answer text and citations.
-9. FastAPI streams assistant message parts back to the browser in the format expected by the AI SDK client.
+9. FastAPI streams assistant message parts back to the app in the format expected by the AI SDK client.
 10. FastAPI persists the final user message, assistant message, cited chunks, and usage metadata to Supabase.
 
 ## Frontend Chat Layer
 
-The frontend remains a plain Vite SPA. It should not adopt Next.js route handlers or server components. The AI SDK is used only for its React chat primitives and streaming client behavior.
+The frontend is a React Native app built with Expo. It should not add its own API routes (Expo Router `+api` files); FastAPI is the only backend. The AI SDK is used only for its React chat primitives and streaming client behavior.
 
 The chat module should be organized around these responsibilities:
 
-- `src/lib/env.ts` validates `VITE_API_BASE_URL`, `VITE_SUPABASE_URL`, and `VITE_SUPABASE_ANON_KEY`.
-- `src/lib/supabase.ts` creates the browser Supabase client.
+- `src/lib/env.ts` validates `EXPO_PUBLIC_API_BASE_URL`, `EXPO_PUBLIC_SUPABASE_URL`, and `EXPO_PUBLIC_SUPABASE_ANON_KEY`.
+- `src/lib/supabase.ts` creates the Supabase client and stores the session on the device.
 - `src/lib/http.ts` wraps `fetch`, applies the backend base URL, injects the Supabase bearer token, handles timeouts, and converts failures into typed API errors.
 - `src/lib/api.ts` exposes product-level calls such as loading threads, creating threads, and fetching message history.
-- `src/pages/chat/*` renders chat routes and delegates chat streaming to a focused chat component.
+- `src/app/` holds the Expo Router screens; the chat screens delegate chat streaming to a focused chat component.
 - `src/components/chat/*` renders messages, citations, source passages, empty states, and streaming status.
 
 The chat component should initialize with stored messages and then let the AI SDK manage in-flight UI state. The transport points to FastAPI, not to a frontend server route.
@@ -119,11 +118,15 @@ The chat component should initialize with stored messages and then let the AI SD
 Conceptual shape:
 
 ```ts
+import { fetch as expoFetch } from 'expo/fetch';
+
 const { messages, sendMessage, status, error } = useChat({
   id: threadId,
   messages: initialMessages,
   transport: new DefaultChatTransport({
     api: `${apiBaseUrl}/chat/stream`,
+    // React Native's built-in fetch can't read a streamed response.
+    fetch: expoFetch as unknown as typeof globalThis.fetch,
     headers: async () => ({
       Authorization: `Bearer ${await getAccessToken()}`,
     }),
@@ -131,7 +134,7 @@ const { messages, sendMessage, status, error } = useChat({
 });
 ```
 
-The exact API surface should be verified during implementation against the installed AI SDK version. The architectural rule is stable: the browser streams to FastAPI with the user's Supabase token, and FastAPI owns the assistant run.
+The exact API surface should be verified during implementation against the installed AI SDK version. The architectural rule is stable: the app streams to FastAPI with the user's Supabase token, and FastAPI owns the assistant run.
 
 ## Backend LLM Layer
 
@@ -210,11 +213,11 @@ This keeps the database responsible for efficient ranked retrieval and keeps the
 
 ## Supabase and FastAPI Communication
 
-Supabase Auth is the identity source. FastAPI must treat the browser's Supabase JWT as the request credential.
+Supabase Auth is the identity source. FastAPI must treat the app's Supabase JWT as the request credential.
 
 Frontend rules:
 
-- Use the anon key only in the browser.
+- Use only the anon key in the app.
 - Read the current session through the shared Supabase client.
 - Send the access token to FastAPI through the shared API client.
 - Never pass tokens through component props.
@@ -343,7 +346,7 @@ Expected error classes:
 - `502 Bad Gateway`: upstream LLM or Supabase failure.
 - `500 Internal Server Error`: unexpected backend failure.
 
-The frontend should render friendly messages while preserving enough technical detail in logs for debugging. Network and CORS failures should be distinguishable from HTTP failures in the shared API client.
+The frontend should render friendly messages while preserving enough technical detail in logs for debugging. Network failures (such as an unreachable backend URL) should be distinguishable from HTTP failures in the shared API client.
 
 ## Configuration
 
@@ -351,9 +354,9 @@ Each service must keep one settings module as the source of truth.
 
 Frontend settings:
 
-- `VITE_API_BASE_URL`
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY`
+- `EXPO_PUBLIC_API_BASE_URL`
+- `EXPO_PUBLIC_SUPABASE_URL`
+- `EXPO_PUBLIC_SUPABASE_ANON_KEY`
 
 Backend settings:
 
@@ -369,16 +372,15 @@ Do not read environment variables directly from components, route handlers, or s
 
 ## Deployment Shape
 
-Railway should run two services:
+Railway runs one service:
 
-- Frontend: static Vite build served as a web app.
 - Backend: FastAPI service running Uvicorn.
 
-Supabase remains hosted and stores the durable retrieval data. The Railway backend can stay stateless because document chunks, embeddings, full-text search vectors, chats, and citations all live in Supabase Postgres. Raw downloaded filings remain gitignored local ingestion inputs unless a later workflow stores them in object storage.
+The app is built with Expo Application Services (EAS) and installed on analysts' phones through internal distribution for the pilot. Supabase remains hosted and stores the durable retrieval data. The Railway backend can stay stateless because document chunks, embeddings, full-text search vectors, chats, and citations all live in Supabase Postgres. Raw downloaded filings remain gitignored local ingestion inputs unless a later workflow stores them in object storage.
 
 ## Implementation Sequence
 
-1. Scaffold the frontend SPA and backend FastAPI app according to the repo conventions.
+1. Scaffold the Expo app and backend FastAPI app according to the repo conventions.
 2. Add SQLAlchemy models and Alembic migration setup in the backend.
 3. Add the initial Alembic migration for `pgvector`, source document, chunk, full-text, chat, and citation tables.
 4. Add Supabase Auth in the frontend and token verification in FastAPI.
@@ -394,8 +396,8 @@ Supabase remains hosted and stores the durable retrieval data. The Railway backe
 
 ## Non-Goals
 
-- No Next.js, SSR, server components, or frontend route handlers.
-- No direct OpenAI calls from the browser.
+- No API routes inside the app; FastAPI is the only backend.
+- No direct OpenAI calls from the app.
 - No separate managed vector database outside Supabase.
 - No multi-tenant architecture.
 - No external market/news data.

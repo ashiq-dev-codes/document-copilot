@@ -24,8 +24,8 @@ You need these values in backend and frontend env config (exact variable names w
 | Value | Where to find it | Used by |
 | ----- | ---------------- | ------- |
 | **Project URL** | Dashboard → **Project Settings** → **API** → Project URL | Frontend + backend |
-| **anon (public) key** | Same page → `anon` `public` key | Frontend (browser-safe) |
-| **service_role (secret) key** | Same page → `service_role` `secret` key | Backend only — never expose to the browser |
+| **anon (public) key** | Same page → `anon` `public` key | Frontend (safe to ship inside the app) |
+| **service_role (secret) key** | Same page → `service_role` `secret` key | Backend only — never put it in the app |
 | **Project ref** | Dashboard URL `supabase.com/dashboard/project/<ref>` or `supabase projects list` | CLI commands |
 | **Direct database connection string** | Dashboard → **Project Settings** → **Database** → Connection string | Alembic migrations and backend DB access |
 | **Database password** | What you set at project creation | Direct Postgres connection |
@@ -73,4 +73,4 @@ See [Backend setup](backend-setup.md) for the Alembic workflow.
 ## Next steps
 
 - [Backend setup](backend-setup.md) — Python service + Supabase client
-- [Frontend setup](frontend-setup.md) — React app + `@supabase/supabase-js`
+- [Frontend setup](frontend-setup.md) — React Native (Expo) app + `@supabase/supabase-js`

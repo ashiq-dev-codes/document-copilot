@@ -13,12 +13,12 @@ Full brief: [docs/client-brief.md](docs/client-brief.md)
 | Layer              | Choice                                               |
 | ------------------ | ---------------------------------------------------- |
 | Backend            | Python + FastAPI                                     |
-| Frontend           | Vite + React SPA + TypeScript                        |
+| Frontend           | React Native (Expo) + TypeScript                     |
 | Database           | Supabase Postgres (users, chats, documents, chunks)  |
 | Migrations         | SQLAlchemy models + Alembic                          |
 | Retrieval          | Supabase `pgvector` + Postgres full-text search      |
 | Auth               | Supabase Auth (email only)                           |
-| Hosting            | Railway                                              |
+| Hosting            | Railway (backend), Expo EAS (app builds)             |
 | LLM + embeddings   | OpenAI                                               |
 
 ## Repo layout
@@ -31,7 +31,7 @@ document-copilot/
 ├── docs/
 │   └── client-brief.md # the client one-pager
 ├── backend/            # FastAPI service
-└── frontend/           # React SPA (Vite)
+└── frontend/           # React Native app (Expo)
 ```
 
 ## Prerequisites
@@ -44,6 +44,7 @@ Install these before setting up `backend/` or `frontend/`:
 | [uv](https://docs.astral.sh/uv/getting-started/installation/) | latest | Backend deps + `data/download.py` | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
 | [Node.js](https://nodejs.org/) | 20+ (LTS) | Frontend toolchain | nodejs.org or `nvm install --lts` |
 | [pnpm](https://pnpm.io/installation) | latest | Frontend package manager | `corepack enable && corepack prepare pnpm@latest --activate` |
+| [Expo Go](https://expo.dev/go) or a simulator | latest | Running the app | Expo Go from the App Store / Play Store, or Xcode / Android Studio |
 
 You also need accounts/keys for external services once the app is wired up. Start with [docs/guides/supabase-setup.md](docs/guides/supabase-setup.md) (account + project), then create an [OpenAI API key](https://platform.openai.com/api-keys) when the LLM layer is wired up.
 

@@ -5,12 +5,12 @@ This file is the source of truth for any coding agent (Claude Code, Cursor, Code
 ## Stack
 
 - **Backend:** Python + FastAPI
-- **Frontend:** Vite + React SPA + TypeScript
+- **Frontend:** React Native (Expo) + TypeScript
 - **Database:** Supabase Postgres (users, chats, source documents, chunks)
 - **Migrations:** SQLAlchemy models + Alembic from the backend
 - **Retrieval:** Supabase `pgvector` + Postgres full-text search
 - **Auth:** Supabase Auth
-- **Hosting:** Railway (backend service + frontend service)
+- **Hosting:** Railway (backend service); the app is built and shipped with Expo (EAS)
 - **LLM + embeddings:** OpenAI
 
 Stack is locked unless explicitly changed. Don't propose alternatives without a stated reason.
@@ -24,7 +24,7 @@ document-copilot/
 ├── data/               # local corpus + download script (payloads gitignored)
 ├── docs/               # specs, briefs, design notes
 ├── backend/            # FastAPI service (see backend/AGENTS.md)
-└── frontend/           # React SPA (see frontend/AGENTS.md)
+└── frontend/           # React Native app, Expo (see frontend/AGENTS.md)
 ```
 
 ## Dependency policy
@@ -34,7 +34,7 @@ document-copilot/
 OK to depend on:
 
 - Things that are genuinely hard to get right (HTTP clients, ASGI servers, SQL drivers, parsers, LLM SDKs, ORM, migrations, auth SDKs).
-- The declared stack (FastAPI, React, Vite, Supabase clients, OpenAI SDK, etc.).
+- The declared stack (FastAPI, React Native, Expo, Supabase clients, OpenAI SDK, etc.).
 
 Not OK:
 
@@ -52,7 +52,7 @@ Per-stack specifics live in `backend/AGENTS.md` and `frontend/AGENTS.md`.
 
 ## Configuration
 
-A single settings module is the source of truth for environment per service (`backend/app/config.py`, `frontend/lib/env.ts`). Do not call `os.getenv` / read `process.env` directly in app code. Do not call `load_dotenv` anywhere. If a third-party SDK reads env vars directly, mirror them in the settings module — don't sprinkle `setdefault` elsewhere.
+A single settings module is the source of truth for environment per service (`backend/app/config.py`, `frontend/src/lib/env.ts`). Do not call `os.getenv` / read `process.env` directly in app code. Do not call `load_dotenv` anywhere. If a third-party SDK reads env vars directly, mirror them in the settings module — don't sprinkle `setdefault` elsewhere.
 
 Fail fast on startup if required config is missing. No silent fallbacks that hide real config errors.
 

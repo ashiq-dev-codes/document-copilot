@@ -39,7 +39,7 @@ An internal chatbot — call it **Document Copilot** — where any Driftwood ana
 - Ask questions in plain English about any filing in Driftwood's curated corpus
 - Get a sourced answer that cites the specific filing and the specific page
 - Trust the answer enough to base downstream analysis on it
-- Use it from a browser, logged in with their Driftwood email address
+- Use it from their phone (iOS or Android), logged in with their Driftwood email address
 - See their own past conversations
 
 ## Example analyst questions
@@ -82,7 +82,6 @@ A wrong but confident answer is worse than no answer. Hallucinations kill the pr
 - Anything generating analysis not grounded in the corpus
 - Multi-tenant / multi-client. This is Driftwood-internal only.
 - Billing, plans, paywalls
-- Mobile app
 
 ## Definition of done
 
