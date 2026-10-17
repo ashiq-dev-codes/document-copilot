@@ -41,7 +41,7 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 
 - [x] 🤖 First git commit of the starter kit
 - [x] 🤖 Install pnpm (`corepack enable`)
-- [ ] ✍️ Install the Expo Go app on your phone, or set up an iOS Simulator / Android emulator
+- [x] ✍️ Install the Expo Go app on your phone, or set up an iOS Simulator / Android emulator
 - [ ] ✍️ Create the Supabase project and save its keys somewhere safe ([guide](guides/supabase-setup.md))
 - [ ] ✍️ Create an OpenAI API key and set a small monthly spending limit in the OpenAI dashboard
 - [ ] ✍️ Put your name and email in `USER_AGENT` at the top of `data/download.py`, then run `uv run data/download.py`
