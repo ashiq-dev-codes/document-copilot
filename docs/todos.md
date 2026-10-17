@@ -68,7 +68,7 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 
 - [x] ✍️ Run your first script with `uv run hello.py`
 - [x] 🤖 Set up Ruff in VS Code: formats Python on save (Python's `dart format`)
-- [ ] ✍️ Variables, `if`, `for`, f-strings (`f"Hello {name}"`)
+- [x] ✍️ Variables, `if`, `for`, f-strings (`f"Hello {name}"`)
 - [ ] ✍️ Lists and dicts (Python's `List` and `Map`)
 - [ ] ✍️ Functions with type hints (`def add(a: int, b: int) -> int:`)
 - [ ] ✍️ Classes, `@dataclass` and Pydantic `BaseModel` (Python's version of Dart model classes)
