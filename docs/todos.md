@@ -44,7 +44,7 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 - [x] ✍️ Install the Expo Go app on your phone, or set up an iOS Simulator / Android emulator
 - [x] ✍️ Create the Supabase project and save its keys somewhere safe ([guide](guides/supabase-setup.md))
 - [x] ✍️ Create an OpenAI API key and set a small monthly spending limit in the OpenAI dashboard
-- [ ] ✍️ Put your name and email in `USER_AGENT` at the top of `data/download.py`, then run `uv run data/download.py`
+- [x] ✍️ Put your name and email in `USER_AGENT` at the top of `data/download.py`, then run `uv run data/download.py`
 - [ ] ✍️ Open `data/downloads/manifest.json` and one downloaded filing in your browser
 
 **Learn:**
