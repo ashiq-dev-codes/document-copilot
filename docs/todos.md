@@ -66,7 +66,8 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 
 **Goal:** read and write basic Python without fear. Practice in a `playground/` folder that we don't commit.
 
-- [ ] ✍️ Run your first script with `uv run hello.py`
+- [x] ✍️ Run your first script with `uv run hello.py`
+- [x] 🤖 Set up Ruff in VS Code: formats Python on save (Python's `dart format`)
 - [ ] ✍️ Variables, `if`, `for`, f-strings (`f"Hello {name}"`)
 - [ ] ✍️ Lists and dicts (Python's `List` and `Map`)
 - [ ] ✍️ Functions with type hints (`def add(a: int, b: int) -> int:`)
