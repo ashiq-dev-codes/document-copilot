@@ -74,7 +74,7 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 - [x] ✍️ Classes, `@dataclass` and Pydantic `BaseModel` (Python's version of Dart model classes)
 - [x] ✍️ `async` / `await` (same idea as Dart's `Future`)
 - [x] ✍️ Imports, packages, `pyproject.toml` (Python's `pubspec.yaml`)
-- [ ] 🤝 Read `data/download.py` top to bottom and explain what each function does
+- [x] 🤝 Read `data/download.py` top to bottom and explain what each function does
 
 **Learn:**
 
