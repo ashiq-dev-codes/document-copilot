@@ -72,7 +72,7 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 - [x] ✍️ Lists and dicts (Python's `List` and `Map`)
 - [x] ✍️ Functions with type hints (`def add(a: int, b: int) -> int:`)
 - [x] ✍️ Classes, `@dataclass` and Pydantic `BaseModel` (Python's version of Dart model classes)
-- [ ] ✍️ `async` / `await` (same idea as Dart's `Future`)
+- [x] ✍️ `async` / `await` (same idea as Dart's `Future`)
 - [ ] ✍️ Imports, packages, `pyproject.toml` (Python's `pubspec.yaml`)
 - [ ] 🤝 Read `data/download.py` top to bottom and explain what each function does
 
