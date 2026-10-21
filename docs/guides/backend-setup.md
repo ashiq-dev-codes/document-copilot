@@ -21,7 +21,7 @@ Initialize Alembic once from `backend/`:
 uv run alembic init alembic
 ```
 
-Configure `alembic/env.py` to import the app's SQLAlchemy metadata and read the direct database URL from `app.config.settings`. Use the direct/session Supabase database connection, not the transaction pooler URL, for migrations.
+Configure `alembic/env.py` to import the app's SQLAlchemy metadata and read the direct database URL from `app.core.config.settings`. Use the direct/session Supabase database connection, not the transaction pooler URL, for migrations.
 
 Create a migration after changing SQLAlchemy models:
 
@@ -82,7 +82,7 @@ uv run python -m ipykernel install --user --name document-copilot-backend --disp
 Then notebooks can import backend modules:
 
 ```python
-from app.config import settings
+from app.core.config import settings
 ```
 
 ## Sample SEC data

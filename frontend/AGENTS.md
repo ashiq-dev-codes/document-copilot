@@ -42,21 +42,45 @@ If yes to (3), add it — but flag the decision in the commit message.
 
 ## Layout (to be created during build)
 
+Follows the simple, feature-first architecture in [../AGENTS.md](../AGENTS.md#architecture-simple-feature-first-ddd-lite), using the usual feature-based React layout.
+
 ```text
 frontend/
 ├── src/
-│   ├── app/               # Expo Router screens (one file = one screen)
-│   │   ├── _layout.tsx    # Root layout: auth gate + navigation
-│   │   ├── (auth)/        # Sign-in, sign-up
-│   │   └── (app)/         # Chat list, chat thread
-│   ├── components/        # App components (chat/, ui/)
-│   └── lib/               # Framework-agnostic helpers (http, api, auth, supabase, env)
-├── app.json               # Expo config
+│   ├── app/                   # Expo Router route files only — each renders a screen from features/
+│   │   ├── _layout.tsx        # Root layout: auth gate + navigation
+│   │   ├── (auth)/            # sign-in, sign-up routes
+│   │   └── (app)/             # chat list, chat thread routes
+│   ├── components/ui/         # Shared UI components (button, input, ...)
+│   ├── lib/                   # Shared plumbing only, no feature logic
+│   │   ├── env.ts             # Validated EXPO_PUBLIC_ settings
+│   │   ├── http.ts            # fetch wrapper: base URL, bearer token, timeouts, ApiError
+│   │   ├── api.ts             # api.get/post/... singleton
+│   │   ├── supabase.ts        # Supabase client
+│   │   └── theme.ts           # Shared colors and spacing
+│   └── features/
+│       ├── auth/              # sign in / sign up / session
+│       └── chat/              # threads, messages, streaming, citations
+├── app.json                   # Expo config
 ├── tsconfig.json
 └── package.json
 ```
 
-Keep imports consistent with the `@/*` alias (e.g. `@/lib/api`, `@/components/chat/message-list`).
+Inside each feature (only the parts it needs):
+
+```text
+features/<name>/
+├── api/          # Calls to our backend for this feature, using lib/api (e.g. get-threads.ts)
+├── hooks/        # State and logic (e.g. use-chat-thread.ts), the Cubit equivalent
+├── screens/      # One screen per file (e.g. chat-thread-screen.tsx)
+├── components/   # Components used only by this feature
+└── types.ts      # TypeScript types for this feature
+```
+
+- Route files in `src/app/` stay a few lines: they import and render a screen, nothing else.
+- Screens call hooks; hooks call the feature's `api/`; only `api/` calls `lib/api`.
+
+Keep imports consistent with the `@/*` alias (e.g. `@/lib/api`, `@/features/chat/components/message-list`).
 
 ## Code style (frontend-specific)
 

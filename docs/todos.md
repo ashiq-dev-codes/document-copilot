@@ -97,14 +97,14 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 
 **Goal:** a running FastAPI server, and all tables created in Supabase.
 
-- [ ] 🤖 Install the backend packages (`uv add ...`, [guide](guides/backend-setup.md))
-- [ ] 🤖 `app/config.py`: reads settings from `.env` and stops the app at startup if one is missing
+- [x] 🤖 Install the backend packages (`uv add ...`, [guide](guides/backend-setup.md))
+- [x] 🤖 `app/core/config.py`: reads settings from `.env` and stops the app at startup if one is missing
 - [ ] 🤝 `app/main.py`: the FastAPI app with a `GET /health` route (you write the route)
 - [ ] ✍️ Run the server, then open `http://localhost:8000/health` and `http://localhost:8000/docs`
 - [ ] 🤖 Database models, explained table by table: users, documents, chunks, chat threads, messages, citations
 - [ ] 🤖 Alembic setup and the first migration (pgvector, the embedding column, the full-text column, indexes, row-level security)
 - [ ] ✍️ Run `uv run alembic upgrade head`, then find your new tables in the Supabase dashboard
-- [ ] 🤖 `app/database/supabase.py`: the database clients
+- [ ] 🤖 `app/core/database.py`: the database clients
 
 **Learn:**
 
@@ -132,7 +132,7 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 
 **Backend**
 
-- [ ] 🤝 `app/auth/dependencies.py`: checks the token and returns the current user
+- [ ] 🤝 `app/core/auth.py`: checks the token and returns the current user
 - [ ] 🤝 Return `401` when the token is missing or invalid
 
 **Frontend**

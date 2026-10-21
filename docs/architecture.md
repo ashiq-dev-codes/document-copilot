@@ -104,14 +104,14 @@ Supabase is responsible for authentication and durable product state. App access
 
 The frontend is a React Native app built with Expo. It should not add its own API routes (Expo Router `+api` files); FastAPI is the only backend. The AI SDK is used only for its React chat primitives and streaming client behavior.
 
-The chat module should be organized around these responsibilities:
+The app follows the simple, feature-first architecture in [AGENTS.md](../AGENTS.md#architecture-simple-feature-first-ddd-lite) and is organized around these responsibilities:
 
 - `src/lib/env.ts` validates `EXPO_PUBLIC_API_BASE_URL`, `EXPO_PUBLIC_SUPABASE_URL`, and `EXPO_PUBLIC_SUPABASE_ANON_KEY`.
 - `src/lib/supabase.ts` creates the Supabase client and stores the session on the device.
 - `src/lib/http.ts` wraps `fetch`, applies the backend base URL, injects the Supabase bearer token, handles timeouts, and converts failures into typed API errors.
-- `src/lib/api.ts` exposes product-level calls such as loading threads, creating threads, and fetching message history.
-- `src/app/` holds the Expo Router screens; the chat screens delegate chat streaming to a focused chat component.
-- `src/components/chat/*` renders messages, citations, source passages, empty states, and streaming status.
+- `src/lib/api.ts` exposes the `api.get/post/...` client used by every feature's `api/` folder.
+- `src/features/chat/api/` calls the backend for threads and message history; `hooks/`, `screens/` and `components/` in the same feature render messages, citations, source passages, empty states, and streaming status.
+- `src/app/` holds thin Expo Router route files that render screens from `src/features/`.
 
 The chat component should initialize with stored messages and then let the AI SDK manage in-flight UI state. The transport points to FastAPI, not to a frontend server route.
 
@@ -140,37 +140,43 @@ The exact API surface should be verified during implementation against the insta
 
 PydanticAI should be introduced as the backend's orchestration layer for answer generation. It replaces ad hoc prompt calls with a typed agent boundary.
 
-Recommended backend modules:
+Recommended backend modules, following the simple, feature-first architecture in [AGENTS.md](../AGENTS.md#architecture-simple-feature-first-ddd-lite):
 
 ```text
 backend/app/
-├── api/
-│   └── chat.py                 # FastAPI routes for chat threads and streaming
-├── auth/
-│   └── dependencies.py         # Supabase JWT verification and current user dependency
-├── chat/
-│   ├── orchestrator.py         # Coordinates one chat turn end-to-end
-│   ├── messages.py             # Converts AI SDK messages to and from internal message types
-│   └── streaming.py            # Emits AI SDK-compatible streaming events
-├── assistant/
-│   ├── agent.py                # PydanticAI agent definition
-│   ├── deps.py                 # Runtime dependency dataclass for the agent
-│   ├── outputs.py              # GroundedAnswer, Citation, and SourcePassage
-│   └── instructions.md         # System instructions and product contract
+├── main.py                      # FastAPI app: CORS, routers, health check
+├── core/
+│   ├── config.py                # Settings
+│   ├── database.py              # SQLAlchemy Base/engine + user-scoped and admin Supabase clients
+│   └── auth.py                  # Supabase JWT verification and get_current_user dependency
+├── documents/
+│   ├── schemas.py               # SourceDocument, Chunk
+│   ├── models.py                # source_documents, document_chunks tables
+│   ├── chunker.py               # Pure chunking rules (size, overlap, page/section metadata)
+│   ├── repository.py            # Store and read documents, chunks, embeddings
+│   └── service.py               # Ingestion: parse → chunk → embed → store
 ├── retrieval/
-│   ├── queries.py              # pgvector and full-text SQL queries
-│   ├── fusion.py               # Reciprocal Rank Fusion for hybrid search
-│   └── retriever.py            # Query-to-source-passage retrieval logic
-├── grounding/
-│   └── validator.py            # Ensures citations map to retrieved passages
-└── database/
-    ├── supabase.py             # Supabase client construction
-    ├── models.py               # SQLAlchemy table models used by Alembic autogenerate
-    ├── chats.py                # Chat, thread, message, and citation persistence
-    └── documents.py            # Source document, chunk, embedding, and search queries
+│   ├── schemas.py               # SourcePassage
+│   ├── fusion.py                # Pure Reciprocal Rank Fusion
+│   ├── repository.py            # pgvector and full-text SQL queries, neighbor chunks
+│   └── service.py               # Query → fused, ranked source passages
+├── assistant/
+│   ├── schemas.py               # GroundedAnswer, Citation, DocumentAgentDeps
+│   ├── grounding.py             # Pure check: every citation maps to a retrieved passage
+│   ├── agent.py                 # PydanticAI agent definition and tools
+│   ├── instructions.md          # System instructions and product contract
+│   └── service.py               # Run the agent, then enforce grounding
+└── chat/
+    ├── schemas.py               # AI SDK message formats, thread and message bodies
+    ├── models.py                # chat_threads, chat_messages, message_citations tables
+    ├── repository.py            # Threads, messages, citation records
+    ├── service.py               # One chat turn: retrieve → assistant → stream → persist
+    ├── streaming.py             # Emits AI SDK-compatible streaming events
+    ├── dependencies.py          # FastAPI Depends functions that build services
+    └── router.py                # Thread CRUD and POST /chat/stream
 ```
 
-These names should follow the product workflow rather than a generic service layer. `chat/orchestrator.py` owns the full turn lifecycle, `assistant/agent.py` owns the LLM boundary, `retrieval/` owns hybrid source-passage search, and `grounding/` owns the trust contract that answers must cite retrieved evidence.
+Features follow the product workflow. `chat/service.py` owns the full turn lifecycle, `assistant/` owns the LLM boundary and the trust contract that answers must cite retrieved evidence, `retrieval/` owns hybrid source-passage search, and `documents/` owns ingestion. Pure rules (`chunker.py`, `fusion.py`, `grounding.py`) take data in and return data out, so they can be unit-tested without a database or the LLM.
 
 The agent should receive explicit dependencies rather than reaching into globals:
 
@@ -236,10 +242,10 @@ The backend can verify the JWT by calling Supabase Auth's user endpoint or by va
 
 Recommended backend units:
 
-- `app/auth/dependencies.py` validates bearer tokens and exposes `get_current_user`.
-- `app/database/supabase.py` creates user-scoped and admin Supabase clients.
-- `app/database/chats.py` stores and reads chat threads, messages, and citation records.
-- `app/database/documents.py` stores and reads source documents, chunks, embeddings, and full-text search data.
+- `app/core/auth.py` validates bearer tokens and exposes `get_current_user`.
+- `app/core/database.py` creates user-scoped and admin Supabase clients.
+- `app/chat/repository.py` stores and reads chat threads, messages, and citation records.
+- `app/documents/repository.py` stores and reads source documents, chunks, embeddings, and full-text search data.
 
 ## Streaming Contract
 
@@ -302,7 +308,7 @@ Database schema changes are managed from the backend with SQLAlchemy models and 
 
 The workflow is:
 
-1. Update SQLAlchemy models in `app/database/models.py`.
+1. Update SQLAlchemy models in the feature's `models.py` (e.g. `app/chat/models.py`).
 2. Generate a candidate migration with `uv run alembic revision --autogenerate -m "<change>"`.
 3. Review the generated migration file in `backend/alembic/versions/`.
 4. Add explicit migration operations for Postgres/Supabase features that autogenerate cannot infer reliably.
@@ -368,7 +374,7 @@ Backend settings:
 - `ALLOWED_ORIGINS`
 - embedding model name and dimensions
 
-Do not read environment variables directly from components, route handlers, or services. Frontend code should use `src/lib/env.ts`. Backend code should use `app/config.py`.
+Do not read environment variables directly from components, route handlers, or services. Frontend code should use `src/lib/env.ts`. Backend code should use `app/core/config.py`.
 
 ## Deployment Shape
 
