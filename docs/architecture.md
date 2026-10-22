@@ -149,31 +149,32 @@ backend/app/
 │   ├── config.py                # Settings
 │   ├── database.py              # SQLAlchemy Base/engine + user-scoped and admin Supabase clients
 │   └── auth.py                  # Supabase JWT verification and get_current_user dependency
-├── documents/
-│   ├── schemas.py               # SourceDocument, Chunk
-│   ├── models.py                # source_documents, document_chunks tables
-│   ├── chunker.py               # Pure chunking rules (size, overlap, page/section metadata)
-│   ├── repository.py            # Store and read documents, chunks, embeddings
-│   └── service.py               # Ingestion: parse → chunk → embed → store
-├── retrieval/
-│   ├── schemas.py               # SourcePassage
-│   ├── fusion.py                # Pure Reciprocal Rank Fusion
-│   ├── repository.py            # pgvector and full-text SQL queries, neighbor chunks
-│   └── service.py               # Query → fused, ranked source passages
-├── assistant/
-│   ├── schemas.py               # GroundedAnswer, Citation, DocumentAgentDeps
-│   ├── grounding.py             # Pure check: every citation maps to a retrieved passage
-│   ├── agent.py                 # PydanticAI agent definition and tools
-│   ├── instructions.md          # System instructions and product contract
-│   └── service.py               # Run the agent, then enforce grounding
-└── chat/
-    ├── schemas.py               # AI SDK message formats, thread and message bodies
-    ├── models.py                # chat_threads, chat_messages, message_citations tables
-    ├── repository.py            # Threads, messages, citation records
-    ├── service.py               # One chat turn: retrieve → assistant → stream → persist
-    ├── streaming.py             # Emits AI SDK-compatible streaming events
-    ├── dependencies.py          # FastAPI Depends functions that build services
-    └── router.py                # Thread CRUD and POST /chat/stream
+└── features/
+    ├── documents/
+    │   ├── schemas.py               # SourceDocument, Chunk
+    │   ├── models.py                # source_documents, document_chunks tables
+    │   ├── chunker.py               # Pure chunking rules (size, overlap, page/section metadata)
+    │   ├── repository.py            # Store and read documents, chunks, embeddings
+    │   └── service.py               # Ingestion: parse → chunk → embed → store
+    ├── retrieval/
+    │   ├── schemas.py               # SourcePassage
+    │   ├── fusion.py                # Pure Reciprocal Rank Fusion
+    │   ├── repository.py            # pgvector and full-text SQL queries, neighbor chunks
+    │   └── service.py               # Query → fused, ranked source passages
+    ├── assistant/
+    │   ├── schemas.py               # GroundedAnswer, Citation, DocumentAgentDeps
+    │   ├── grounding.py             # Pure check: every citation maps to a retrieved passage
+    │   ├── agent.py                 # PydanticAI agent definition and tools
+    │   ├── instructions.md          # System instructions and product contract
+    │   └── service.py               # Run the agent, then enforce grounding
+    └── chat/
+        ├── schemas.py               # AI SDK message formats, thread and message bodies
+        ├── models.py                # chat_threads, chat_messages, message_citations tables
+        ├── repository.py            # Threads, messages, citation records
+        ├── service.py               # One chat turn: retrieve → assistant → stream → persist
+        ├── streaming.py             # Emits AI SDK-compatible streaming events
+        ├── dependencies.py          # FastAPI Depends functions that build services
+        └── router.py                # Thread CRUD and POST /chat/stream
 ```
 
 Features follow the product workflow. `chat/service.py` owns the full turn lifecycle, `assistant/` owns the LLM boundary and the trust contract that answers must cite retrieved evidence, `retrieval/` owns hybrid source-passage search, and `documents/` owns ingestion. Pure rules (`chunker.py`, `fusion.py`, `grounding.py`) take data in and return data out, so they can be unit-tested without a database or the LLM.
@@ -244,8 +245,8 @@ Recommended backend units:
 
 - `app/core/auth.py` validates bearer tokens and exposes `get_current_user`.
 - `app/core/database.py` creates user-scoped and admin Supabase clients.
-- `app/chat/repository.py` stores and reads chat threads, messages, and citation records.
-- `app/documents/repository.py` stores and reads source documents, chunks, embeddings, and full-text search data.
+- `app/features/chat/repository.py` stores and reads chat threads, messages, and citation records.
+- `app/features/documents/repository.py` stores and reads source documents, chunks, embeddings, and full-text search data.
 
 ## Streaming Contract
 
@@ -308,7 +309,7 @@ Database schema changes are managed from the backend with SQLAlchemy models and 
 
 The workflow is:
 
-1. Update SQLAlchemy models in the feature's `models.py` (e.g. `app/chat/models.py`).
+1. Update SQLAlchemy models in the feature's `models.py` (e.g. `app/features/chat/models.py`).
 2. Generate a candidate migration with `uv run alembic revision --autogenerate -m "<change>"`.
 3. Review the generated migration file in `backend/alembic/versions/`.
 4. Add explicit migration operations for Postgres/Supabase features that autogenerate cannot infer reliably.

@@ -40,19 +40,20 @@ backend/
 │   │   ├── config.py        # Pydantic settings — single source of truth for env
 │   │   ├── database.py      # SQLAlchemy Base/engine + Supabase clients
 │   │   └── auth.py          # Supabase JWT verification + get_current_user dependency
-│   ├── documents/           # Source filings + chunks: parse, chunk, embed, store
-│   ├── retrieval/           # Hybrid search: pgvector + full-text + RRF fusion
-│   ├── assistant/           # PydanticAI agent, instructions, grounding checks
-│   └── chat/                # Threads, messages, citations, one chat turn, streaming
+│   └── features/            # One folder per feature
+│       ├── documents/       # Source filings + chunks: parse, chunk, embed, store
+│       ├── retrieval/       # Hybrid search: pgvector + full-text + RRF fusion
+│       ├── assistant/       # PydanticAI agent, instructions, grounding checks
+│       └── chat/            # Threads, messages, citations, one chat turn, streaming
 ├── ingest/                  # One-off CLI entry points that call feature services
-├── tests/                   # Mirrors app/: tests/retrieval/test_fusion.py
+├── tests/                   # Mirrors app/: tests/features/retrieval/test_fusion.py
 └── pyproject.toml
 ```
 
 Inside each feature, one flat folder (only the files it needs):
 
 ```text
-app/<feature>/
+app/features/<feature>/
 ├── router.py        # FastAPI APIRouter: thin, validates input, calls the service
 ├── schemas.py       # Pydantic models: request/response bodies, LLM output
 ├── models.py        # SQLAlchemy table models
@@ -92,7 +93,7 @@ app/<feature>/
 - **Prefer unit over integration.** Mock at the service boundary.
 - Fast suite (`pytest -m "not integration"`) must stay green and hit no network / no DB.
 - Integration tests go behind `@pytest.mark.integration` and may require live OpenAI / Supabase credentials.
-- Tests mirror the app layout (`app/retrieval/fusion.py` → `tests/retrieval/test_fusion.py`).
+- Tests mirror the app layout (`app/features/retrieval/fusion.py` → `tests/features/retrieval/test_fusion.py`).
 - Required test coverage: ingestion logic, retrieval, citation extraction, grounding enforcement.
 
 ## Anti-patterns (rejected)
