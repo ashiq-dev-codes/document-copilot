@@ -20,3 +20,7 @@ exclude-newer = "7 days"
 dev = [
     "ruff==0.17.1",
 ]
+
+[tool.ruff.lint.isort]
+# Our migrations folder is also named alembic/; the import means the installed package.
+known-third-party = ["alembic"]
