@@ -5,12 +5,12 @@ This file is the source of truth for any coding agent (Claude Code, Cursor, Code
 ## Stack
 
 - **Backend:** Python + FastAPI
-- **Frontend:** React Native (Expo) + TypeScript
+- **Frontend:** Flutter (Dart) mobile app
 - **Database:** Supabase Postgres (users, chats, source documents, chunks)
 - **Migrations:** SQLAlchemy models + Alembic from the backend
 - **Retrieval:** Supabase `pgvector` + Postgres full-text search
 - **Auth:** Supabase Auth
-- **Hosting:** Railway (backend service); the app is built and shipped with Expo (EAS)
+- **Hosting:** Railway (backend service); the Flutter app is distributed to pilot users as test builds (TestFlight / Firebase App Distribution)
 - **LLM + embeddings:** OpenAI
 
 Stack is locked unless explicitly changed. Don't propose alternatives without a stated reason.
@@ -24,28 +24,28 @@ document-copilot/
 ├── data/               # local corpus + download script (payloads gitignored)
 ├── docs/               # specs, briefs, design notes
 ├── backend/            # FastAPI service (see backend/AGENTS.md)
-└── frontend/           # React Native app, Expo (see frontend/AGENTS.md)
+└── frontend/           # Flutter app (see frontend/AGENTS.md)
 ```
 
 ## Architecture: simple, feature-first (DDD-lite)
 
-Both services organize code **by feature** (documents, retrieval, assistant, chat, auth), with shared plumbing kept separate. Each service uses the file names its own community expects (FastAPI on the backend, feature-based React on the frontend); the layers underneath are the same. Per-service folder trees live in `backend/AGENTS.md` and `frontend/AGENTS.md`.
+Both services organize code **by feature** (documents, retrieval, assistant, chat, auth), with shared plumbing kept separate. Each service uses the file names its own community expects (FastAPI on the backend, feature-first Flutter on the frontend); the layers underneath are the same. Per-service folder trees live in `backend/AGENTS.md` and `frontend/AGENTS.md`.
 
-| Layer | Job | Backend (FastAPI) | Frontend (React Native) |
+| Layer | Job | Backend (FastAPI) | Frontend (Flutter) |
 | --- | --- | --- | --- |
-| Presentation | HTTP or UI only, kept thin | `router.py` | `screens/`, `components/` |
-| Logic | The feature's use cases and business rules | `service.py`, plus pure rule modules (`chunker.py`, `fusion.py`, `grounding.py`) | `hooks/` |
-| Data access | Talks to the outside world (database, OpenAI, backend API) | `repository.py` | `api/` |
-| Models | The shapes of the data | `schemas.py` (Pydantic), `models/` (SQLAlchemy tables, one per file) | `types.ts` |
+| Presentation | HTTP or UI only, kept thin | `router.py` | `presentation/pages/`, `presentation/widgets/` |
+| Logic | The feature's use cases and business rules | `service.py`, plus pure rule modules (`chunker.py`, `fusion.py`, `grounding.py`) | `presentation/cubit/` (Cubits) |
+| Data access | Talks to the outside world (database, OpenAI, backend API) | `repository.py` | `data/` (repository) |
+| Models | The shapes of the data | `schemas.py` (Pydantic), `models/` (SQLAlchemy tables, one per file) | `models/` (one model per file) |
 
 Rules:
 
 - **One direction:** presentation → logic → data access. Data access never imports presentation.
 - **Pure rules stay pure:** chunking, rank fusion and citation checks take data in and return data out, with no I/O, so they're unit-testable without a database or the LLM.
-- **No interfaces or abstract base classes by default.** Python duck typing and TypeScript structural typing let a test pass a fake object with the same methods. Add a `Protocol` / interface only when a second real implementation exists.
+- **No interfaces or abstract base classes by default.** Python duck typing and Dart's implicit interfaces (any class can be `implements`-ed) let a test pass a fake with the same methods. Add a `Protocol` / abstract class only when a second real implementation exists.
 - **Only the files a feature needs.** No empty files or placeholder folders.
-- **Features don't import each other's data access** (`repository.py`, `api/`). Use the other feature's service or hooks instead.
-- **Shared plumbing only** in `backend/app/core/` and `frontend/src/lib/` (config, database and HTTP clients, auth, theme). No feature logic there.
+- **Features don't import each other's data access** (`repository.py`, `data/`). Use the other feature's service or Cubit instead.
+- **Shared plumbing only** in `backend/app/core/` and `frontend/lib/core/` (config, database and HTTP clients, auth, theme, dependency injection). No feature logic there.
 
 ## Dependency policy
 
@@ -54,7 +54,7 @@ Rules:
 OK to depend on:
 
 - Things that are genuinely hard to get right (HTTP clients, ASGI servers, SQL drivers, parsers, LLM SDKs, ORM, migrations, auth SDKs).
-- The declared stack (FastAPI, React Native, Expo, Supabase clients, OpenAI SDK, etc.).
+- The declared stack (FastAPI, Flutter, flutter_bloc, Dio, Supabase clients, OpenAI SDK, etc.).
 
 Not OK:
 
@@ -72,7 +72,7 @@ Per-stack specifics live in `backend/AGENTS.md` and `frontend/AGENTS.md`.
 
 ## Configuration
 
-A single settings module is the source of truth for environment per service (`backend/app/core/config.py`, `frontend/src/lib/env.ts`). Do not call `os.getenv` / read `process.env` directly in app code. Do not call `load_dotenv` anywhere. If a third-party SDK reads env vars directly, mirror them in the settings module — don't sprinkle `setdefault` elsewhere.
+A single settings module is the source of truth for environment per service (`backend/app/core/config.py`, `frontend/lib/core/config/env.dart`). Do not call `os.getenv` / `String.fromEnvironment` directly in app code. Do not call `load_dotenv` anywhere. If a third-party SDK reads env vars directly, mirror them in the settings module — don't sprinkle `setdefault` elsewhere.
 
 Fail fast on startup if required config is missing. No silent fallbacks that hide real config errors.
 

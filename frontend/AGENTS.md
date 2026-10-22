@@ -1,117 +1,102 @@
 # Frontend — agent notes
 
-This is the React Native app for Document Copilot, built with Expo. Read [../AGENTS.md](../AGENTS.md) first — universal building rules live there. This file adds frontend-specific conventions.
+This is the Flutter app for Document Copilot (iOS and Android). Read [../AGENTS.md](../AGENTS.md) first — universal building rules live there. This file adds frontend-specific conventions.
 
 ## Stack
 
-- **React Native + Expo** (TypeScript, strict). Runs on iOS and Android. Use Expo's managed workflow: configure native settings through `app.json` and config plugins, never by hand-editing generated `ios/` or `android/` folders.
-- **Expo Router** for navigation. Screens are files under `src/app/`.
-- **React Native core components** (`View`, `Text`, `Pressable`, `FlatList`, `TextInput`, ...) styled with `StyleSheet.create`. No styling or UI-kit libraries.
-- **`@supabase/supabase-js`** for auth (email only — no Google sign-in, no SSO providers). The session is stored on the device using the storage setup from Supabase's Expo guide.
-- **Vercel AI SDK** (`useChat`) for chat state and streaming. Pass `fetch` from `expo/fetch`: React Native's built-in `fetch` can't read a streamed response.
-
-## Package manager
-
-**`pnpm` only.** Do not use `npm install` or `yarn add`. The lockfile is `pnpm-lock.yaml`. If you see `package-lock.json` or `yarn.lock` appear, that's a bug — delete it.
-
-Add Expo and React Native packages with `pnpm expo install <name>` so the version matches the installed Expo SDK. Use `pnpm add <name>` only for plain JavaScript packages.
-
-**Minimum release age: 7 days.** Configured via `.npmrc` (`minimum-release-age=10080` minutes). pnpm will refuse to install any package version published less than 7 days ago. This defends against typosquat / compromised-release attacks where a malicious version of a popular package goes live and gets pulled within hours.
-
-If a fresh package is genuinely required (e.g. urgent security fix in a dep we already use), override per-install and justify in the commit message — don't lower the global threshold.
+- **Flutter** (stable channel) and Dart 3. Lints from `flutter_lints`; `flutter analyze` must stay clean.
+- **`flutter_bloc`** — Cubits only, no `Bloc` event classes.
+- **`get_it`** for dependency injection.
+- **`dio`** for HTTP, through one shared client in `lib/core/network/`.
+- **`supabase_flutter`** for auth (email only — no Google sign-in, no SSO providers). It stores the session on the device.
+- Streaming answers come from FastAPI as Server-Sent Events, read with Dio (`ResponseType.stream`) and turned into a Dart `Stream`. No extra streaming package.
 
 ## Dependency policy
 
 See universal policy in [../AGENTS.md](../AGENTS.md). Frontend-specific:
 
-- **HTTP:** use the native `fetch` API through a thin client in `src/lib/http.ts` and the `api` singleton in `src/lib/api.ts`. **No axios, ky, got, superagent, redaxios.**
-- **Dates:** use native `Date` and `Intl.DateTimeFormat`. No moment, dayjs, date-fns unless genuinely needed.
-- **Utilities:** use native `Array` / `Object` / `Map` methods. No lodash, ramda.
-- **State:** `useState` / `useReducer` / `useContext` first. Only reach for external state libraries when the pain is real.
-- **Forms:** controlled `TextInput` components with `useState`. No form libraries.
-- **Validation:** only add a schema library when we actually need runtime validation at boundaries.
-- **UI components:** build small components from React Native core components. Check Expo's own packages before adding a third-party one.
+- Add packages with `flutter pub add <name>`.
+- **No code generation:** no `freezed`, `json_serializable` or `build_runner`. Models are hand-written with `fromJson` / `toJson`.
+- **One of each:** Dio is the only HTTP client, flutter_bloc the only state management, get_it the only DI. No `http`, `riverpod`, `provider`, `get`, etc. alongside them.
+- **Navigation:** plain `Navigator` with an auth gate. No router package unless deep links are needed.
+- **Widgets:** build small widgets from Material. Check Flutter itself before adding a UI package.
 
 Before adding a package, check:
 
-1. Is there a React Native, Expo, or TS/JS API that does this?
-2. Can a small component built from core components do it?
+1. Is there a Flutter or Dart SDK API that does this?
+2. Can a small widget or function do it?
 3. Is it small, well-maintained, and worth the maintenance cost?
 
 If yes to (3), add it — but flag the decision in the commit message.
 
 ## Layout (to be created during build)
 
-Follows the simple, feature-first architecture in [../AGENTS.md](../AGENTS.md#architecture-simple-feature-first-ddd-lite), using the usual feature-based React layout.
+Follows the simple, feature-first architecture in [../AGENTS.md](../AGENTS.md#architecture-simple-feature-first-ddd-lite).
 
 ```text
 frontend/
-├── src/
-│   ├── app/                   # Expo Router route files only — each renders a screen from features/
-│   │   ├── _layout.tsx        # Root layout: auth gate + navigation
-│   │   ├── (auth)/            # sign-in, sign-up routes
-│   │   └── (app)/             # chat list, chat thread routes
-│   ├── components/ui/         # Shared UI components (button, input, ...)
-│   ├── lib/                   # Shared plumbing only, no feature logic
-│   │   ├── env.ts             # Validated EXPO_PUBLIC_ settings
-│   │   ├── http.ts            # fetch wrapper: base URL, bearer token, timeouts, ApiError
-│   │   ├── api.ts             # api.get/post/... singleton
-│   │   ├── supabase.ts        # Supabase client
-│   │   └── theme.ts           # Shared colors and spacing
+├── lib/
+│   ├── main.dart                  # Reads config, registers dependencies, runs the app
+│   ├── app.dart                   # MaterialApp, theme, auth gate
+│   ├── core/                      # Shared plumbing only, no feature logic
+│   │   ├── config/env.dart        # Validated --dart-define settings
+│   │   ├── network/api_client.dart  # Dio: base URL, Supabase bearer token, timeouts, errors
+│   │   ├── di.dart                # get_it registrations
+│   │   ├── theme/                 # Colors, text styles
+│   │   └── widgets/               # Shared widgets (buttons, inputs, loaders)
 │   └── features/
-│       ├── auth/              # sign in / sign up / session
-│       └── chat/              # threads, messages, streaming, citations
-├── app.json                   # Expo config
-├── tsconfig.json
-└── package.json
+│       ├── auth/                  # sign in / sign up / session
+│       └── chat/                  # threads, messages, streaming, citations
+├── env.example.json               # Template for env.json (committed)
+├── env.json                       # Real values (gitignored)
+└── pubspec.yaml
 ```
 
 Inside each feature (only the parts it needs):
 
 ```text
 features/<name>/
-├── api/          # Calls to our backend for this feature, using lib/api (e.g. get-threads.ts)
-├── hooks/        # State and logic (e.g. use-chat-thread.ts), the Cubit equivalent
-├── screens/      # One screen per file (e.g. chat-thread-screen.tsx)
-├── components/   # Components used only by this feature
-└── types.ts      # TypeScript types for this feature
+├── data/
+│   └── <name>_repository.dart     # Calls the backend through core/network/api_client.dart
+├── models/                        # One model per file, hand-written fromJson / toJson
+└── presentation/
+    ├── cubit/                     # <thing>_cubit.dart + <thing>_state.dart (sealed states)
+    ├── pages/                     # One page per file (chat_thread_page.dart)
+    └── widgets/                   # Widgets used only by this feature
 ```
 
-- Route files in `src/app/` stay a few lines: they import and render a screen, nothing else.
-- Screens call hooks; hooks call the feature's `api/`; only `api/` calls `lib/api`.
-
-Keep imports consistent with the `@/*` alias (e.g. `@/lib/api`, `@/features/chat/components/message-list`).
+- Pages read Cubits; Cubits call the repository; only `data/` calls `api_client.dart`.
+- No abstract repository + impl pair by default: tests can `implements` the concrete class.
+- Register each feature's repository and Cubits in `core/di.dart`.
 
 ## Code style (frontend-specific)
 
-- **TypeScript strict.** No `any` unless there's no alternative; prefer `unknown` and narrow.
-- **Small, composable functions and components** over clever abstractions. Three similar lines > a premature generic.
-- **One component = one file.** Components stay small enough to fit on one screen.
-- **Styles live next to the component** in a `StyleSheet.create` block at the bottom of the same file. Shared colors and spacing live in `src/lib/theme.ts`.
+- **Small widgets.** Extract a widget class when a build method gets long; prefer classes over helper methods that return widgets.
+- **Cubit states are `sealed` classes** (`ChatInitial`, `ChatLoading`, `ChatLoaded`, `ChatFailure`).
+- **`const` constructors** wherever possible.
+- **Package imports** (`package:document_copilot/...`), not relative imports across features.
 
 ## Configuration
 
-- All env reads go through a single `src/lib/env.ts` module that validates required vars at startup. Never read `process.env.EXPO_PUBLIC_X` directly in components.
-- Env vars are prefixed `EXPO_PUBLIC_`. Expo copies them into the app bundle, so anyone with the app can read them: never put a secret in one.
+- All settings come from `--dart-define-from-file=env.json` and are read only in `lib/core/config/env.dart`, which throws at startup if one is missing. Never call `String.fromEnvironment` anywhere else.
+- `env.json` is gitignored; `env.example.json` lists the keys: `API_BASE_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`.
+- These values are compiled into the app, so anyone with the app can read them: never put a secret (OpenAI key, Supabase service-role key) in one.
 
 ## Backend integration
 
-- Talks to a separate Python backend over JSON. URL comes from `EXPO_PUBLIC_API_BASE_URL`.
-- On a phone or emulator, `localhost` means the device itself. During local development, point `EXPO_PUBLIC_API_BASE_URL` at your computer's network IP (or `10.0.2.2` on the Android emulator).
-- Always use `api.get/post/put/patch/delete` from `@/lib/api` — it handles base URL, JSON, Supabase bearer token, timeouts, and typed `ApiError`s (including the `isNetworkError` flag that distinguishes an unreachable backend from HTTP errors).
-- Auth is Supabase email. The bearer token is injected automatically via the `api` client; never thread tokens through component props.
+- Talks to the FastAPI backend over JSON. Base URL comes from `API_BASE_URL`.
+- On a phone or emulator, `localhost` means the device itself. During local development, point `API_BASE_URL` at your computer's network IP (or `10.0.2.2` on the Android emulator).
+- The Supabase access token is added to every request by an interceptor in `api_client.dart`; never pass tokens through widget constructors.
 
 ## Testing
 
-**No frontend tests.** Do not write `*.test.ts` / `*.test.tsx` files or introduce a test runner. We verify the app manually on a device or simulator plus `pnpm tsc --noEmit` and `pnpm lint`. If you find yourself reaching for Jest, Detox, or Maestro — stop. That's not what this project does. Correctness for shared logic comes from keeping it simple and well-typed, not from a test suite.
+**No frontend test suite for now.** Verify on a device or simulator plus `flutter analyze`. Add Cubit unit tests only if a Cubit's logic becomes non-trivial.
 
 ## Anti-patterns (rejected)
 
-- Reading `process.env.EXPO_PUBLIC_X` directly outside `lib/env.ts`.
-- Importing an HTTP library when `fetch` would do.
-- Using the built-in `fetch` for the chat stream instead of `expo/fetch`.
-- Mixing client state libraries (Zustand + Jotai + Redux) for one project.
-- `any` annotations to silence the type-checker.
-- Styling or UI-kit libraries alongside `StyleSheet`.
-- Hand-editing generated `ios/` or `android/` folders instead of using `app.json` / config plugins.
-- API routes inside the app (Expo Router `+api` files) — FastAPI is the only backend.
+- `String.fromEnvironment` outside `core/config/env.dart`.
+- A second HTTP client, state-management library, or DI container.
+- Code generation for models.
+- Calling Dio or Supabase directly from a page or widget.
+- Secrets in `env.json` or anywhere in the app.
+- Direct OpenAI calls from the app — FastAPI owns every AI call.

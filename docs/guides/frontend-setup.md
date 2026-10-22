@@ -1,40 +1,40 @@
 # Frontend setup
 
-This project uses a React Native app built with Expo, so analysts can use Document Copilot on their phones (iOS and Android). Expo handles the native build tooling, which keeps the frontend focused on authenticated app flows and a clean connection to the FastAPI backend. All AI work happens in the backend; the app only signs in, sends questions and shows the streamed answers.
-
-## Before you start
-
-- Install the **Expo Go** app on your phone (App Store / Play Store), or set up an iOS Simulator (Xcode) or Android emulator (Android Studio).
-- Your phone and computer must be on the same Wi-Fi network.
+This project uses a Flutter app, so analysts can use Document Copilot on their phones and tablets (iOS and Android). All AI work happens in the backend; the app only signs in, sends questions and shows the streamed answers with their citations.
 
 ## Init (from `frontend/`)
 
 ```bash
 cd frontend
-pnpm create expo-app@latest .
-pnpm expo install @supabase/supabase-js
-pnpm add ai @ai-sdk/react
+flutter create . --project-name document_copilot --org com.documentcopilot --platforms ios,android
+flutter pub add flutter_bloc get_it dio supabase_flutter
 ```
 
-The default Expo template includes TypeScript and Expo Router. If `create-expo-app` refuses because the folder isn't empty, move `frontend/AGENTS.md` out temporarily and put it back afterwards.
+`flutter create .` adds the project files around the existing `AGENTS.md`, `env.json` and `env.example.json`.
 
-Then follow Supabase's Expo guide: install the session storage package it uses and set up the client in `src/lib/supabase.ts`.
+## Settings
+
+Copy `env.example.json` to `env.json` (gitignored) and fill in the values:
+
+```json
+{
+  "API_BASE_URL": "http://192.168.1.20:8000",
+  "SUPABASE_URL": "https://your-project-ref.supabase.co",
+  "SUPABASE_ANON_KEY": "your-publishable-key"
+}
+```
+
+On a phone or emulator, `localhost` means the device itself. Set `API_BASE_URL` to your computer's network IP, or `http://10.0.2.2:8000` on the Android emulator.
 
 ## Run
 
 ```bash
 cd frontend
-pnpm install
-pnpm expo start
+flutter run --dart-define-from-file=env.json
 ```
-
-Scan the QR code with Expo Go, or press `i` (iOS Simulator) or `a` (Android emulator).
-
-On a phone or emulator, `localhost` means the device itself. Set `EXPO_PUBLIC_API_BASE_URL` to your computer's network IP (for example `http://192.168.1.20:8000`), or `http://10.0.2.2:8000` on the Android emulator.
 
 ## Check
 
 ```bash
-pnpm tsc --noEmit
-pnpm lint
+flutter analyze
 ```

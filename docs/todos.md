@@ -40,8 +40,7 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 **Goal:** tools installed, accounts ready, filings downloaded.
 
 - [x] 🤖 First git commit of the starter kit
-- [x] 🤖 Install pnpm (`corepack enable`)
-- [x] ✍️ Install the Expo Go app on your phone, or set up an iOS Simulator / Android emulator
+- [x] ✍️ A test device ready: Red's iPad, paired with the Mac
 - [x] ✍️ Create the Supabase project and save its keys somewhere safe ([guide](guides/supabase-setup.md))
 - [x] ✍️ Create an OpenAI API key and set a small monthly spending limit in the OpenAI dashboard
 - [x] ✍️ Put your name and email in `USER_AGENT` at the top of `data/download.py`, then run `uv run data/download.py`
@@ -57,7 +56,7 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 
 **Explain it back:**
 
-- Why must the OpenAI key never go into the React Native app or into git?
+- Why must the OpenAI key never go into the Flutter app or into git?
 - What's inside `manifest.json`, and why will it be useful later?
 
 ---
@@ -137,11 +136,11 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 
 **Frontend**
 
-- [ ] 🤖 Create the React Native app with Expo: TypeScript and Expo Router ([guide](guides/frontend-setup.md))
-- [ ] 🤖 `src/lib/env.ts` and `src/lib/supabase.ts`
-- [ ] 🤖 `src/lib/http.ts` and `src/lib/api.ts`: a fetch wrapper that adds the token automatically
-- [ ] 🤖 Sign-in and sign-up screens
-- [ ] 🤖 Auth gate: send logged-out users to the sign-in screen
+- [ ] 🤖 Create the Flutter app in `frontend/` ([guide](guides/frontend-setup.md))
+- [ ] ✍️ `core/config/env.dart` (reads `env.json`, fails fast) and Supabase init in `main.dart`
+- [ ] ✍️ `core/network/api_client.dart`: Dio with an interceptor that adds the Supabase token
+- [ ] ✍️ Sign-in and sign-up pages with an auth Cubit
+- [ ] ✍️ Auth gate: send logged-out users to the sign-in page
 - [ ] ✍️ Test it on your phone: sign up, sign in, call a protected endpoint
 
 **Learn:**
@@ -150,8 +149,8 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 - **`Authorization: Bearer <token>`:** the header that carries it. It's your ZERO.40 Dio interceptor again.
 - **`401` vs `403`:** 401 means "who are you?" 403 means "I know who you are, but this isn't yours."
 - **`Depends` in FastAPI:** gives each request what it needs (like the current user), a bit like get_it for one request.
-- **React Native basics:** a component is a widget, `View` is like `Container`, `FlatList` is like `ListView.builder`, state is `setState`, and props are constructor parameters.
-- **Expo Router:** each file in `src/app/` is a screen, so the folder structure is the navigation.
+- **`supabase_flutter`:** signs the user in and keeps the session on the device; the token it gives is what the backend checks.
+- **`--dart-define-from-file`:** how Flutter reads `env.json` at build time, like your ZERO.40 `--dart-define` values.
 - **`localhost` on a phone:** it means the phone itself, not your computer. Use your computer's Wi-Fi IP instead, like the `local` server in ZERO.40's `AppConfig`.
 
 **Explain it back:**
@@ -174,9 +173,9 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 
 **Frontend**
 
-- [ ] 🤖 Screens: sign-in, chat list, one chat thread
-- [ ] 🤖 Chat screen using the AI SDK's `useChat`, pointed at our backend, with `expo/fetch` (React Native's normal `fetch` can't stream)
-- [ ] 🤖 Chat list screen, message list, input box, "typing" indicator
+- [ ] ✍️ Pages: chat list, one chat thread
+- [ ] 🤝 Read the streamed answer with Dio (`ResponseType.stream`) and turn it into a Dart `Stream` in the chat repository
+- [ ] ✍️ Chat Cubit, message list, input box, "typing" indicator
 - [ ] ✍️ Test it: send a message, watch the fake reply stream in, reload, and the history is still there
 
 **Learn:**
@@ -339,7 +338,7 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 **Goal:** the backend runs on the internet and the app is installed on real phones.
 
 - [ ] 🤖 Railway: backend service with its environment variables
-- [ ] 🤖 Build the app with Expo EAS and install it on your phone (internal distribution)
+- [ ] ✍️ Build the app and share it with testers (TestFlight / Firebase App Distribution), like your ZERO.40 tester builds
 - [ ] ✍️ Turn email confirmation back on in Supabase, with a link that opens the app
 - [ ] 🤝 Run migrations and ingestion against the production database
 - [ ] ✍️ Test everything with the installed app against the live backend
@@ -348,13 +347,12 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 
 - **Environments:** dev and production, like your `--test` and `--prod` in ZERO.40.
 - **Environment variables on a server:** the `.env` values, set in Railway's dashboard instead of a file.
-- **Build-time variables:** `EXPO_PUBLIC_` values get baked into the app when it's built, so anyone with the app can read them.
-- **EAS (Expo Application Services):** Expo's cloud service that builds the iOS and Android app files for you.
+- **Build-time variables:** `env.json` values get baked into the app when it's built, so anyone with the app can read them.
 - **Deep link:** a link that opens your app, like the `app_links` setup in ZERO.40. The email confirmation link needs one.
 
 **Explain it back:**
 
-- Why must an `EXPO_PUBLIC_` variable never contain a secret?
+- Why must a value in the Flutter app's `env.json` never be a secret?
 
 ---
 

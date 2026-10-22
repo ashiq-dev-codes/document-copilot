@@ -73,4 +73,4 @@ See [Backend setup](backend-setup.md) for the Alembic workflow.
 ## Next steps
 
 - [Backend setup](backend-setup.md) — Python service + Supabase client
-- [Frontend setup](frontend-setup.md) — React Native (Expo) app + `@supabase/supabase-js`
+- [Frontend setup](frontend-setup.md) — Flutter app + `supabase_flutter`

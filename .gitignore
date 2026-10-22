@@ -42,3 +42,6 @@ logs/
 
 # Python practice files (Phase 1), never committed
 /playground/
+
+# Flutter app settings (real values), never committed
+/frontend/env.json

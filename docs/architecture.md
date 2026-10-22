@@ -4,7 +4,7 @@
 
 Document Copilot is an internal research assistant for analysts who need grounded answers from a curated SEC filing corpus. The architecture must optimize for trust: every answer is generated from retrieved source passages, every factual claim is citable, and the system fails clearly when the corpus does not support an answer.
 
-This document describes the target architecture for the chat experience, LLM orchestration, and the communication layer between the React Native app, Supabase, and FastAPI backend.
+This document describes the target architecture for the chat experience, LLM orchestration, and the communication layer between the Flutter app, Supabase, and FastAPI backend.
 
 ## High-Level Architecture
 
@@ -12,8 +12,7 @@ The best opening diagram is a service-level view that shows the two core paths: 
 
 ```mermaid
 flowchart LR
-    user[Analyst] --> app[Mobile app<br/>React Native + Expo]
-    eas[Expo EAS<br/>app builds] -->|installs app| app
+    user[Analyst] --> app[Mobile app<br/>Flutter]
 
     subgraph railway[Railway]
         backend[Backend service<br/>FastAPI + PydanticAI]
@@ -48,17 +47,17 @@ flowchart LR
 - Use Supabase for identity and durable product state: users, chat threads, source documents, chunks, embeddings, and citation metadata.
 - Use Supabase `pgvector` for semantic retrieval and Postgres full-text search for keyword retrieval.
 - Make the LLM path typed and testable by using PydanticAI agents with explicit dependencies, outputs, and tool boundaries.
-- Preserve a simple deployment model: one stateless backend service on Railway, hosted Supabase, and the app built and shipped with Expo (EAS).
+- Preserve a simple deployment model: one stateless backend service on Railway, hosted Supabase, and the Flutter app distributed as test builds for the pilot.
 
 ## Stack
 
 Frontend:
 
-- React Native + Expo + TypeScript
-- Expo Router for navigation
-- React Native core components and `StyleSheet` for UI
+- Flutter (Dart 3)
+- `flutter_bloc` (Cubits) for state, `get_it` for dependency injection
+- Material widgets for UI, plain `Navigator` with an auth gate
 - `@supabase/supabase-js` for auth, with the session stored on the device
-- Vercel AI SDK UI packages for chat state and streaming client behavior, using `expo/fetch` for streamed responses
+- Dio for HTTP, including reading the Server-Sent Events answer stream
 
 Backend:
 
@@ -89,52 +88,50 @@ Supabase is responsible for authentication and durable product state. App access
 
 ## Request Flow
 
-1. The user signs in with Supabase email auth in the React Native app.
-2. The app stores the Supabase session on the device through `@supabase/supabase-js`.
+1. The user signs in with Supabase email auth in the Flutter app.
+2. The app stores the Supabase session on the device through `supabase_flutter`.
 3. When the user opens a chat, the frontend loads the thread and prior messages through FastAPI, which reads user-scoped records from Supabase.
-4. The chat UI uses the Vercel AI SDK React primitives to manage message state and submit new user messages to the FastAPI chat endpoint.
+4. The chat Cubit holds message state and submits new user messages to the FastAPI chat endpoint.
 5. The frontend sends the Supabase access token as `Authorization: Bearer <token>`.
 6. FastAPI verifies the token with Supabase Auth before doing any retrieval or LLM work.
 7. FastAPI creates a request-scoped context containing the authenticated user, chat thread, Supabase client, retrieval service, citation policy, and LLM settings.
 8. A PydanticAI agent retrieves relevant document chunks, generates a grounded answer, and returns typed output containing answer text and citations.
-9. FastAPI streams assistant message parts back to the app in the format expected by the AI SDK client.
+9. FastAPI streams the answer back to the app as Server-Sent Events (text deltas, then citations).
 10. FastAPI persists the final user message, assistant message, cited chunks, and usage metadata to Supabase.
 
 ## Frontend Chat Layer
 
-The frontend is a React Native app built with Expo. It should not add its own API routes (Expo Router `+api` files); FastAPI is the only backend. The AI SDK is used only for its React chat primitives and streaming client behavior.
+The frontend is a Flutter app. It never calls OpenAI or writes privileged records; FastAPI owns every AI call and the assistant run.
 
 The app follows the simple, feature-first architecture in [AGENTS.md](../AGENTS.md#architecture-simple-feature-first-ddd-lite) and is organized around these responsibilities:
 
-- `src/lib/env.ts` validates `EXPO_PUBLIC_API_BASE_URL`, `EXPO_PUBLIC_SUPABASE_URL`, and `EXPO_PUBLIC_SUPABASE_ANON_KEY`.
-- `src/lib/supabase.ts` creates the Supabase client and stores the session on the device.
-- `src/lib/http.ts` wraps `fetch`, applies the backend base URL, injects the Supabase bearer token, handles timeouts, and converts failures into typed API errors.
-- `src/lib/api.ts` exposes the `api.get/post/...` client used by every feature's `api/` folder.
-- `src/features/chat/api/` calls the backend for threads and message history; `hooks/`, `screens/` and `components/` in the same feature render messages, citations, source passages, empty states, and streaming status.
-- `src/app/` holds thin Expo Router route files that render screens from `src/features/`.
+- `lib/core/config/env.dart` validates `API_BASE_URL`, `SUPABASE_URL`, and `SUPABASE_ANON_KEY` (from `--dart-define-from-file=env.json`).
+- `supabase_flutter` is initialized in `main.dart`; it signs the user in and stores the session on the device.
+- `lib/core/network/api_client.dart` configures Dio: backend base URL, an interceptor that adds the Supabase bearer token, timeouts, and typed errors.
+- `lib/features/chat/data/chat_repository.dart` loads threads and message history, and opens the answer stream.
+- `lib/features/chat/presentation/` holds the chat Cubit and pages that render messages, citations, source passages, empty states, and streaming status.
 
-The chat component should initialize with stored messages and then let the AI SDK manage in-flight UI state. The transport points to FastAPI, not to a frontend server route.
+Conceptual shape of reading the answer stream:
 
-Conceptual shape:
-
-```ts
-import { fetch as expoFetch } from 'expo/fetch';
-
-const { messages, sendMessage, status, error } = useChat({
-  id: threadId,
-  messages: initialMessages,
-  transport: new DefaultChatTransport({
-    api: `${apiBaseUrl}/chat/stream`,
-    // React Native's built-in fetch can't read a streamed response.
-    fetch: expoFetch as unknown as typeof globalThis.fetch,
-    headers: async () => ({
-      Authorization: `Bearer ${await getAccessToken()}`,
-    }),
-  }),
-});
+```dart
+Stream<ChatEvent> streamAnswer(String threadId, String question) async* {
+  final response = await dio.post<ResponseBody>(
+    '/chat/stream',
+    data: {'threadId': threadId, 'message': question},
+    options: Options(responseType: ResponseType.stream),
+  );
+  // Server-Sent Events: each event is a line starting with "data: ".
+  final lines = response.data!.stream
+      .cast<List<int>>()
+      .transform(utf8.decoder)
+      .transform(const LineSplitter());
+  await for (final line in lines) {
+    if (line.startsWith('data: ')) yield ChatEvent.fromJson(jsonDecode(line.substring(6)));
+  }
+}
 ```
 
-The exact API surface should be verified during implementation against the installed AI SDK version. The architectural rule is stable: the app streams to FastAPI with the user's Supabase token, and FastAPI owns the assistant run.
+The chat Cubit appends `text` events to the in-progress answer, attaches `citations` when they arrive, and stops on `done` or `error`. The architectural rule is stable: the app streams from FastAPI with the user's Supabase token, and FastAPI owns the assistant run.
 
 ## Backend LLM Layer
 
@@ -168,11 +165,11 @@ backend/app/
     │   ├── instructions.md          # System instructions and product contract
     │   └── service.py               # Run the agent, then enforce grounding
     └── chat/
-        ├── schemas.py               # AI SDK message formats, thread and message bodies
+        ├── schemas.py               # Request bodies, thread and message responses, stream events
         ├── models/                  # chat_thread.py, chat_message.py, message_citation.py
         ├── repository.py            # Threads, messages, citation records
         ├── service.py               # One chat turn: retrieve → assistant → stream → persist
-        ├── streaming.py             # Emits AI SDK-compatible streaming events
+        ├── streaming.py             # Formats Server-Sent Events (text, citations, done, error)
         ├── dependencies.py          # FastAPI Depends functions that build services
         └── router.py                # Thread CRUD and POST /chat/stream
 ```
@@ -250,7 +247,7 @@ Recommended backend units:
 
 ## Streaming Contract
 
-The frontend should receive incremental assistant output, not wait for a full answer. FastAPI should expose a streaming endpoint that emits AI SDK-compatible message parts.
+The frontend should receive incremental assistant output, not wait for a full answer. FastAPI exposes a streaming endpoint that sends Server-Sent Events (SSE): plain-text lines of the form `data: <json>`.
 
 Recommended endpoint:
 
@@ -265,16 +262,25 @@ Request body:
 ```json
 {
   "threadId": "uuid",
-  "messages": []
+  "message": "Why did Apple's Services revenue grow in 2024?"
 }
 ```
 
-The `messages` payload should use the AI SDK UI message format at the frontend boundary. FastAPI can translate that wire format into internal Pydantic models before invoking the agent.
+Events, in order:
+
+```text
+data: {"type": "text", "delta": "Services revenue grew "}
+data: {"type": "text", "delta": "mainly from advertising [1]."}
+data: {"type": "citations", "citations": [{"marker": 1, "chunkId": "uuid", "ticker": "AAPL", "form": "10-K", "reportDate": "2024-09-28", "page": 23, "excerpt": "Services net sales increased..."}]}
+data: {"type": "done", "messageId": "uuid"}
+```
+
+On failure the stream sends `data: {"type": "error", "code": "...", "message": "..."}` and closes.
 
 Streaming responsibilities:
 
 - Send text deltas as the answer is generated.
-- Send citation/source metadata as structured parts once available.
+- Send citation/source metadata as one structured event once grounding passes.
 - Send clear error events for authentication failures, missing threads, retrieval failures, and grounding failures.
 - Persist only after the assistant run completes successfully, unless a separate partial-message model is deliberately introduced later.
 
@@ -284,7 +290,7 @@ Supabase tables should be small and product-oriented:
 
 - `profiles`: one row per authenticated user, keyed by Supabase `auth.users.id`.
 - `chat_threads`: thread metadata, owner, title, timestamps.
-- `chat_messages`: user and assistant messages in order, with AI SDK-compatible message JSON where useful.
+- `chat_messages`: user and assistant messages in order.
 - `message_citations`: normalized citation records linked to assistant messages.
 - `source_documents`: original document records with filing metadata, source URL, and normalized Markdown content.
 - `document_chunks`: chunk text, chunk metadata, embeddings, and generated full-text search vectors.
@@ -357,9 +363,9 @@ Each service must keep one settings module as the source of truth.
 
 Frontend settings:
 
-- `EXPO_PUBLIC_API_BASE_URL`
-- `EXPO_PUBLIC_SUPABASE_URL`
-- `EXPO_PUBLIC_SUPABASE_ANON_KEY`
+- `API_BASE_URL`
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
 
 Backend settings:
 
@@ -371,7 +377,7 @@ Backend settings:
 - `ALLOWED_ORIGINS`
 - embedding model name and dimensions
 
-Do not read environment variables directly from components, route handlers, or services. Frontend code should use `src/lib/env.ts`. Backend code should use `app/core/config.py`.
+Do not read environment variables directly from components, route handlers, or services. Frontend code should use `lib/core/config/env.dart`. Backend code should use `app/core/config.py`.
 
 ## Deployment Shape
 
@@ -379,17 +385,17 @@ Railway runs one service:
 
 - Backend: FastAPI service running Uvicorn.
 
-The app is built with Expo Application Services (EAS) and installed on analysts' phones through internal distribution for the pilot. Supabase remains hosted and stores the durable retrieval data. The Railway backend can stay stateless because document chunks, embeddings, full-text search vectors, chats, and citations all live in Supabase Postgres. Raw downloaded filings remain gitignored local ingestion inputs unless a later workflow stores them in object storage.
+The Flutter app is built with `flutter build` and installed on analysts' devices through TestFlight (iOS) and Firebase App Distribution (Android) for the pilot. Supabase remains hosted and stores the durable retrieval data. The Railway backend can stay stateless because document chunks, embeddings, full-text search vectors, chats, and citations all live in Supabase Postgres. Raw downloaded filings remain gitignored local ingestion inputs unless a later workflow stores them in object storage.
 
 ## Implementation Sequence
 
-1. Scaffold the Expo app and backend FastAPI app according to the repo conventions.
+1. Scaffold the Flutter app and backend FastAPI app according to the repo conventions.
 2. Add SQLAlchemy models and Alembic migration setup in the backend.
 3. Add the initial Alembic migration for `pgvector`, source document, chunk, full-text, chat, and citation tables.
 4. Add Supabase Auth in the frontend and token verification in FastAPI.
 5. Add the shared frontend API client with automatic bearer-token injection.
 6. Add the chat streaming endpoint with a stubbed assistant response.
-7. Add AI SDK chat UI on the frontend pointed at FastAPI.
+7. Add the Flutter chat screen reading the FastAPI answer stream.
 8. Add Markdown ingestion, chunking, embeddings, and Supabase writes.
 9. Add semantic search with `pgvector`.
 10. Add Postgres full-text search and Python RRF fusion.
