@@ -152,7 +152,7 @@ backend/app/
 └── features/
     ├── documents/
     │   ├── schemas.py               # SourceDocument, Chunk
-    │   ├── models.py                # source_documents, document_chunks tables
+    │   ├── models/                  # source_document.py, document_chunk.py (one table per file)
     │   ├── chunker.py               # Pure chunking rules (size, overlap, page/section metadata)
     │   ├── repository.py            # Store and read documents, chunks, embeddings
     │   └── service.py               # Ingestion: parse → chunk → embed → store
@@ -169,7 +169,7 @@ backend/app/
     │   └── service.py               # Run the agent, then enforce grounding
     └── chat/
         ├── schemas.py               # AI SDK message formats, thread and message bodies
-        ├── models.py                # chat_threads, chat_messages, message_citations tables
+        ├── models/                  # chat_thread.py, chat_message.py, message_citation.py
         ├── repository.py            # Threads, messages, citation records
         ├── service.py               # One chat turn: retrieve → assistant → stream → persist
         ├── streaming.py             # Emits AI SDK-compatible streaming events
@@ -309,20 +309,16 @@ Database schema changes are managed from the backend with SQLAlchemy models and 
 
 The workflow is:
 
-1. Update SQLAlchemy models in the feature's `models.py` (e.g. `app/features/chat/models.py`).
+1. Update SQLAlchemy models in the feature's `models/` folder (e.g. `app/features/chat/models/chat_thread.py`).
 2. Generate a candidate migration with `uv run alembic revision --autogenerate -m "<change>"`.
 3. Review the generated migration file in `backend/alembic/versions/`.
 4. Add explicit migration operations for Postgres/Supabase features that autogenerate cannot infer reliably.
 5. Apply the migration locally or against the linked Supabase database with `uv run alembic upgrade head`.
 6. Commit both the model changes and the migration file.
 
-Normal tables and ordinary indexes should be represented in SQLAlchemy models where practical. The following should be written explicitly in migrations with `op.execute()` or carefully reviewed Alembic operations:
+Tables, indexes, the `vector(1536)` embedding column (via `pgvector.sqlalchemy.Vector`), the generated `tsvector` column (via `Computed`), and HNSW/GIN indexes (via `Index(..., postgresql_using=...)`) are all represented in SQLAlchemy models, so autogenerate keeps them in sync instead of proposing to drop them. The following can't be expressed in models and are written explicitly in migrations with `op.execute()`:
 
 - `create extension if not exists vector`
-- `vector(1536)` embedding columns if the SQLAlchemy type renderer is not sufficient
-- generated `tsvector` columns
-- HNSW indexes for vector search
-- GIN indexes for full-text search and JSON metadata
 - RLS enablement and policies
 - grants or Supabase role-specific permissions
 

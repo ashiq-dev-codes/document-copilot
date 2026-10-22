@@ -31,7 +31,7 @@ Follows the simple, feature-first architecture in [../AGENTS.md](../AGENTS.md#ar
 ```text
 backend/
 ├── alembic/
-│   ├── env.py               # Imports every feature's models.py for autogenerate
+│   ├── env.py               # Imports every feature's models package for autogenerate
 │   └── versions/            # Reviewed migration files
 ├── alembic.ini
 ├── app/
@@ -56,7 +56,7 @@ Inside each feature, one flat folder (only the files it needs):
 app/features/<feature>/
 ├── router.py        # FastAPI APIRouter: thin, validates input, calls the service
 ├── schemas.py       # Pydantic models: request/response bodies, LLM output
-├── models.py        # SQLAlchemy table models
+├── models/          # SQLAlchemy tables: one file per table (chat_thread.py), __init__.py re-exports them
 ├── service.py       # Use cases: the feature's logic (like a Cubit)
 ├── repository.py    # Database queries for this feature's tables
 ├── dependencies.py  # FastAPI Depends functions that build the service and repository
@@ -83,8 +83,9 @@ app/features/<feature>/
 ## Database migrations
 
 - Alembic is the source of truth for schema changes. Do not change production tables manually in the Supabase dashboard.
-- SQLAlchemy models live in each feature's `models.py` and describe normal tables and columns. Alembic autogenerate creates candidate migrations, but every generated migration must be reviewed before applying.
-- Supabase/Postgres-specific features belong in explicit migration operations: `create extension vector`, generated `tsvector` columns, HNSW/GIN indexes, RLS enablement, and RLS policies.
+- SQLAlchemy models live in each feature's `models/` folder, one table per file, and describe normal tables and columns. The folder's `__init__.py` imports every table and lists it in `__all__`, so `import app.features.<feature>.models` registers them all. Alembic autogenerate creates candidate migrations, but every generated migration must be reviewed before applying.
+- Generated `tsvector` columns (`Computed(...)`) and HNSW/GIN indexes (`Index(..., postgresql_using=...)`) go in the models, so autogenerate doesn't try to drop them later.
+- Things autogenerate can't see belong in explicit migration operations: `create extension vector`, RLS enablement, RLS policies, and grants.
 - Alembic must use the direct/session database connection, not the Supabase transaction pooler URL.
 - Run migrations from `backend/` with `uv run alembic upgrade head`.
 
