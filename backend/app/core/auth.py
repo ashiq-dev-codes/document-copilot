@@ -10,11 +10,16 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.core.config import settings
 
+# --- Constants ---
+
 SUPABASE_USER_URL = f"{settings.supabase_url}/auth/v1/user"
 
 # Reads the "Authorization: Bearer <token>" header.
 # auto_error=False so a missing header gets our own clear 401 message.
 bearer_scheme = HTTPBearer(auto_error=False)
+
+
+# --- Models ---
 
 
 @dataclass(frozen=True)
@@ -23,6 +28,9 @@ class CurrentUser:
 
     id: uuid.UUID
     email: str
+
+
+# --- Dependencies ---
 
 
 async def get_current_user(
@@ -42,11 +50,11 @@ async def get_current_user(
     raise _unauthorized("Invalid or expired token")
 
 
-# Helpers
-
-
 # Add `user: CurrentUserDep` to any endpoint that needs a signed-in user.
 CurrentUserDep = Annotated[CurrentUser, Depends(get_current_user)]
+
+
+# --- Helpers ---
 
 
 async def _fetch_supabase_user(token: str) -> httpx.Response:

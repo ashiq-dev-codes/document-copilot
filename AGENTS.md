@@ -85,6 +85,7 @@ Fail fast on startup if required config is missing. No silent fallbacks that hid
 - **No feature flags** added speculatively.
 - **One job per function.** When a function does several steps, move each step into a small, well-named private helper (`_fetch_supabase_user`), so the main function reads like a summary.
 - **Same order in every file:** imports → constants → types/models → public functions and classes → private helpers (`_name`). Readers see what a file offers first and the details last.
+- **Section labels only where they help.** A file that mixes several kinds of code (constants, models, main functions, private helpers) gets short labels in that order: `# --- Constants ---`, `# --- Models ---`, `# --- <Main part, e.g. Dependencies> ---`, `# --- Helpers ---` (Dart: `// --- Helpers ---`). Short or single-purpose files (one table, one schema, a few endpoints) have no labels.
 - **Short, plain comments:**
   - Every file starts with a one-line description of its job (Python: module docstring; Dart: `///` on the main class).
   - Every public class and function gets a one-line description of what it's for.
