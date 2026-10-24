@@ -139,10 +139,10 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 - [x] 🤖 Create the Flutter app in `frontend/` ([guide](guides/frontend-setup.md))
 - [x] 🤖 `core/config/config.dart` (`AppConfig`, ZERO.40 style)
 - [x] ✍️ Supabase init in `main.dart`
-- [ ] ✍️ `core/network/api_client.dart`: Dio with an interceptor that adds the Supabase token
-- [ ] ✍️ Sign-in and sign-up pages with an auth Cubit
-- [ ] ✍️ Auth gate: send logged-out users to the sign-in page
-- [ ] ✍️ Test it on your phone: sign up, sign in, call a protected endpoint
+- [x] 🤖 `core/network/api_client.dart` + `shared/utils/dio/app_interceptor.dart`: Dio adds the Supabase token; on 401 refresh + retry once
+- [x] 🤖 Sign-in and sign-up pages with an auth Cubit
+- [x] 🤖 Auth gate: send logged-out users to the sign-in page
+- [x] ✍️ Test it: sign in, auto-login, and `GET /auth/me` answered by our backend (tested in Chrome; iPad later)
 
 **Learn:**
 
