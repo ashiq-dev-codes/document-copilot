@@ -17,6 +17,11 @@ enum Distribution {
 
 /// Every setting the app needs, in one place.
 abstract final class AppConfig {
+  // The publishable key is meant to ship inside apps; the tables are protected by RLS.
+  static const supabaseUrl = 'https://nkhwcvjauhzmdsdphvqw.supabase.co';
+  static const supabasePublishableKey =
+      'sb_publishable_87DQChhVoWpOGLzgbCFYOw_xaK89bV_';
+
   static const _env = String.fromEnvironment('ENV', defaultValue: 'local');
 
   static const _distribution = String.fromEnvironment(
@@ -42,9 +47,4 @@ abstract final class AppConfig {
       'Production API URL is added when the backend is deployed (Phase 10).',
     ),
   };
-
-  // The publishable key is meant to ship inside apps; the tables are protected by RLS.
-  static const supabaseUrl = 'https://nkhwcvjauhzmdsdphvqw.supabase.co';
-  static const supabasePublishableKey =
-      'sb_publishable_87DQChhVoWpOGLzgbCFYOw_xaK89bV_';
 }
