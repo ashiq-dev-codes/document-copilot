@@ -72,7 +72,7 @@ Per-stack specifics live in `backend/AGENTS.md` and `frontend/AGENTS.md`.
 
 ## Configuration
 
-A single settings module is the source of truth for environment per service (`backend/app/core/config.py`, `frontend/lib/core/config/env.dart`). Do not call `os.getenv` / `String.fromEnvironment` directly in app code. Do not call `load_dotenv` anywhere. If a third-party SDK reads env vars directly, mirror them in the settings module — don't sprinkle `setdefault` elsewhere.
+A single settings module is the source of truth for environment per service (`backend/app/core/config.py`, `frontend/lib/core/config/config.dart`). Do not call `os.getenv` / `String.fromEnvironment` directly in app code. Do not call `load_dotenv` anywhere. If a third-party SDK reads env vars directly, mirror them in the settings module — don't sprinkle `setdefault` elsewhere.
 
 Fail fast on startup if required config is missing. No silent fallbacks that hide real config errors.
 

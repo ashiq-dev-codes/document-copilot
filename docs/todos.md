@@ -137,7 +137,8 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 **Frontend**
 
 - [x] 🤖 Create the Flutter app in `frontend/` ([guide](guides/frontend-setup.md))
-- [ ] ✍️ `core/config/env.dart` (reads `env.json`, fails fast) and Supabase init in `main.dart`
+- [x] 🤖 `core/config/config.dart` (`AppConfig`, ZERO.40 style)
+- [ ] ✍️ Supabase init in `main.dart`
 - [ ] ✍️ `core/network/api_client.dart`: Dio with an interceptor that adds the Supabase token
 - [ ] ✍️ Sign-in and sign-up pages with an auth Cubit
 - [ ] ✍️ Auth gate: send logged-out users to the sign-in page
@@ -150,7 +151,7 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 - **`401` vs `403`:** 401 means "who are you?" 403 means "I know who you are, but this isn't yours."
 - **`Depends` in FastAPI:** gives each request what it needs (like the current user), a bit like get_it for one request.
 - **`supabase_flutter`:** signs the user in and keeps the session on the device; the token it gives is what the backend checks.
-- **`--dart-define-from-file`:** how Flutter reads `env.json` at build time, like your ZERO.40 `--dart-define` values.
+- **Publishable key in the app:** why it's safe to ship (RLS locks the tables), and why secret keys never go in the app.
 - **`localhost` on a phone:** it means the phone itself, not your computer. Use your computer's Wi-Fi IP instead, like the `local` server in ZERO.40's `AppConfig`.
 
 **Explain it back:**
@@ -347,12 +348,12 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 
 - **Environments:** dev and production, like your `--test` and `--prod` in ZERO.40.
 - **Environment variables on a server:** the `.env` values, set in Railway's dashboard instead of a file.
-- **Build-time variables:** `env.json` values get baked into the app when it's built, so anyone with the app can read them.
+- **Production config:** set the deployed backend URL for `Environment.production` in `config.dart`, then build with `--dart-define=ENV=production`.
 - **Deep link:** a link that opens your app, like the `app_links` setup in ZERO.40. The email confirmation link needs one.
 
 **Explain it back:**
 
-- Why must a value in the Flutter app's `env.json` never be a secret?
+- Why can the Supabase publishable key be in `config.dart`, but never the OpenAI key?
 
 ---
 

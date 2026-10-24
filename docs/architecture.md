@@ -105,7 +105,7 @@ The frontend is a Flutter app. It never calls OpenAI or writes privileged record
 
 The app follows the simple, feature-first architecture in [AGENTS.md](../AGENTS.md#architecture-simple-feature-first-ddd-lite) and is organized around these responsibilities:
 
-- `lib/core/config/env.dart` validates `API_BASE_URL`, `SUPABASE_URL`, and `SUPABASE_ANON_KEY` (from `--dart-define-from-file=env.json`).
+- `lib/core/config/config.dart` (`AppConfig`) holds the backend URL per environment, the Supabase URL, and the Supabase publishable key.
 - `supabase_flutter` is initialized in `main.dart`; it signs the user in and stores the session on the device.
 - `lib/core/network/api_client.dart` configures Dio: backend base URL, an interceptor that adds the Supabase bearer token, timeouts, and typed errors.
 - `lib/features/chat/data/chat_repository.dart` loads threads and message history, and opens the answer stream.
@@ -361,11 +361,11 @@ The frontend should render friendly messages while preserving enough technical d
 
 Each service must keep one settings module as the source of truth.
 
-Frontend settings:
+Frontend settings (`AppConfig`, committed; public values only):
 
-- `API_BASE_URL`
-- `SUPABASE_URL`
-- `SUPABASE_ANON_KEY`
+- backend API URL per environment (`local`, `production`)
+- Supabase URL
+- Supabase publishable key
 
 Backend settings:
 
@@ -377,7 +377,7 @@ Backend settings:
 - `ALLOWED_ORIGINS`
 - embedding model name and dimensions
 
-Do not read environment variables directly from components, route handlers, or services. Frontend code should use `lib/core/config/env.dart`. Backend code should use `app/core/config.py`.
+Do not read environment variables directly from components, route handlers, or services. Frontend code should use `lib/core/config/config.dart`. Backend code should use `app/core/config.py`.
 
 ## Deployment Shape
 

@@ -39,7 +39,7 @@ frontend/
 │   ├── main.dart                  # Reads config, registers dependencies, runs the app
 │   ├── app.dart                   # MaterialApp, theme, auth gate
 │   ├── core/                      # Shared plumbing only, no feature logic
-│   │   ├── config/env.dart        # Validated --dart-define settings
+│   │   ├── config/config.dart     # AppConfig: environment, backend URL, Supabase project
 │   │   ├── network/api_client.dart  # Dio: base URL, Supabase bearer token, timeouts, errors
 │   │   ├── di.dart                # get_it registrations
 │   │   ├── theme/                 # Colors, text styles
@@ -47,8 +47,6 @@ frontend/
 │   └── features/
 │       ├── auth/                  # sign in / sign up / session
 │       └── chat/                  # threads, messages, streaming, citations
-├── env.example.json               # Template for env.json (committed)
-├── env.json                       # Real values (gitignored)
 └── pubspec.yaml
 ```
 
@@ -78,15 +76,16 @@ features/<name>/
 
 ## Configuration
 
-- All settings come from `--dart-define-from-file=env.json` and are read only in `lib/core/config/env.dart`, which throws at startup if one is missing. Never call `String.fromEnvironment` anywhere else.
-- `env.json` is gitignored; `env.example.json` lists the keys: `API_BASE_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`.
-- These values are compiled into the app, so anyone with the app can read them: never put a secret (OpenAI key, Supabase service-role key) in one.
+- All settings live in `AppConfig` (`lib/core/config/config.dart`), ZERO.40 style: the backend URL per `Environment` (`local`, `production`), the Supabase URL and the Supabase **publishable** key.
+- Pick the environment with `--dart-define=ENV=production`; plain `flutter run` uses `local`. `config.dart` is the only file allowed to call `String.fromEnvironment`.
+- An environment without a value yet throws a clear `StateError` instead of falling back silently.
+- `config.dart` is committed and compiled into the app, so anyone can read it. Only public values belong there (the Supabase publishable key is designed for this; tables are protected by RLS). Never put a secret (OpenAI key, Supabase secret/service-role key) in the app.
 
 ## Backend integration
 
-- Talks to the FastAPI backend over JSON. Base URL comes from `API_BASE_URL`.
+- Talks to the FastAPI backend over JSON. Base URL comes from `AppConfig.apiBaseUrl`.
 - The web build runs in a browser, so the backend must list its address in `ALLOWED_ORIGINS` (CORS). Native apps don't need this.
-- On a phone or emulator, `localhost` means the device itself. During local development, point `API_BASE_URL` at your computer's network IP (or `10.0.2.2` on the Android emulator).
+- On a phone or emulator, `localhost` means the device itself. The `local` environment points at your computer's network IP (use `10.0.2.2` on the Android emulator); update it in `config.dart` if your Mac's IP changes.
 - The Supabase access token is added to every request by an interceptor in `api_client.dart`; never pass tokens through widget constructors.
 
 ## Testing
@@ -95,9 +94,9 @@ features/<name>/
 
 ## Anti-patterns (rejected)
 
-- `String.fromEnvironment` outside `core/config/env.dart`.
+- `String.fromEnvironment` outside `core/config/config.dart`.
 - A second HTTP client, state-management library, or DI container.
 - Code generation for models.
 - Calling Dio or Supabase directly from a page or widget.
-- Secrets in `env.json` or anywhere in the app.
+- Secrets in `config.dart` or anywhere in the app.
 - Direct OpenAI calls from the app — FastAPI owns every AI call.
