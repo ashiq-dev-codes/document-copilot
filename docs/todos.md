@@ -103,7 +103,7 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 - [x] 🤖 Database models, explained table by table: users, documents, chunks, chat threads, messages, citations
 - [x] 🤖 Alembic setup and the first migration (pgvector, the embedding column, the full-text column, indexes, row-level security)
 - [x] ✍️ Run `uv run alembic upgrade head`, then find your new tables in the Supabase dashboard
-- [ ] 🤖 `app/core/database.py`: the database clients
+- [x] 🤖 `app/core/database.py`: the database clients
 
 **Learn:**
 
