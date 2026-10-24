@@ -342,6 +342,7 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 - [ ] ✍️ Build the app and share it with testers (TestFlight / Firebase App Distribution), like your ZERO.40 tester builds
 - [ ] ✍️ Turn email confirmation back on in Supabase, with a link that opens the app
 - [ ] 🤝 Limit who can use the app: the publishable key is public by design, so restrict sign-ups (invite-only, or only the company email domain) and add backend rate limits, so strangers can't run up OpenAI costs
+- [ ] ✍️ Before deploying or making the repo public: change the test account's password (it's prefilled in `sign_in_page.dart` for debug builds) or delete that account
 - [ ] 🤝 Run migrations and ingestion against the production database
 - [ ] ✍️ Test everything with the installed app against the live backend
 

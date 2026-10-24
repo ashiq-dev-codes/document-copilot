@@ -1,4 +1,5 @@
 import 'package:corextra/corextra.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -25,6 +26,16 @@ class _SignInPageState extends State<SignInPage> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   bool _isCreatingAccount = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Debug builds start with the shared test account, so signing in is one click.
+    if (kDebugMode) {
+      _email.text = 'ashiq.dev.codes+copilot-test@gmail.com';
+      _password.text = 'Test-cVUre2Kzv99n';
+    }
+  }
 
   @override
   void dispose() {
