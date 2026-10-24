@@ -55,7 +55,7 @@ Inside each feature, one flat folder (only the files it needs):
 ```text
 app/features/<feature>/
 ├── router.py        # FastAPI APIRouter: thin, validates input, calls the service
-├── schemas.py       # Pydantic models: request/response bodies, LLM output
+├── schemas/         # Pydantic models: one file per schema (user_response.py), __init__.py re-exports them
 ├── models/          # SQLAlchemy tables: one file per table (chat_thread.py), __init__.py re-exports them
 ├── service.py       # Use cases: the feature's logic (like a Cubit)
 ├── repository.py    # Database queries for this feature's tables
@@ -63,6 +63,7 @@ app/features/<feature>/
 └── <rule>.py        # Pure business rules, e.g. chunker.py, fusion.py, grounding.py
 ```
 
+- **Things that multiply get a folder; things that are one-per-feature stay a file.** `models/` and `schemas/` are folders with one class per file; `router.py`, `service.py`, `repository.py` and `dependencies.py` are single files. Split a single file only when it grows too long.
 - Pydantic for data crossing a boundary (HTTP, LLM output, settings); dataclasses for internal data.
 - The service receives its repository as a constructor argument, so a unit test can pass a fake one. No `Protocol` unless two real implementations exist.
 - Unit tests target pure rule modules and `service.py`; `repository.py` is covered by integration tests.
@@ -73,6 +74,9 @@ app/features/<feature>/
 - **Async by default in request-path code.** Don't run blocking I/O on the event loop. Tempfile + small synchronous file reads are OK (they're fast); network calls must be async.
 - **Use `async def` for all route handlers** and any I/O service function.
 - **Validate at boundaries only.** HTTP input is validated by Pydantic models. External API responses are validated when parsed. Internal callers are trusted.
+- **Typed responses, no envelope.** Every endpoint returns a Pydantic model from the feature's `schemas/` folder (e.g. `-> UserResponse`), never a bare `dict`. The HTTP status code says success or failure.
+- **Errors:** `raise HTTPException(status_code, "message")`; the app reads `{"detail": "..."}`. Add a machine-readable `code` only when the app must react differently to different errors.
+- **Protected endpoints** take `user: CurrentUserDep` (from `app.core.auth`); never read the `Authorization` header by hand.
 
 ## Configuration
 

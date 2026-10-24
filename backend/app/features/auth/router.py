@@ -1,17 +1,11 @@
-from typing import Annotated
+from fastapi import APIRouter
 
-from fastapi import APIRouter, Depends
-
-from app.core.auth import CurrentUser, get_current_user
+from app.core.auth import CurrentUserDep
+from app.features.auth.schemas import UserResponse
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.get("/me")
-async def me(
-    user: Annotated[CurrentUser, Depends(get_current_user)],
-) -> dict[str, str]:
-    return {
-        "id": str(user.id),
-        "email": user.email,
-    }
+async def me(user: CurrentUserDep) -> UserResponse:
+    return UserResponse(id=user.id, email=user.email)

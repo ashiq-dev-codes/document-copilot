@@ -40,3 +40,7 @@ async def get_current_user(
     if response.status_code < 500:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or expired token")
     raise HTTPException(status.HTTP_502_BAD_GATEWAY, "Auth service unavailable")
+
+
+# Add `user: CurrentUserDep` to any endpoint to require a signed-in user.
+CurrentUserDep = Annotated[CurrentUser, Depends(get_current_user)]

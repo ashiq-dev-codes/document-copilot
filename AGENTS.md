@@ -36,7 +36,7 @@ Both services organize code **by feature** (documents, retrieval, assistant, cha
 | Presentation | HTTP or UI only, kept thin | `router.py` | `presentation/pages/`, `presentation/widgets/` |
 | Logic | The feature's use cases and business rules | `service.py`, plus pure rule modules (`chunker.py`, `fusion.py`, `grounding.py`) | `presentation/cubit/` (Cubits) |
 | Data access | Talks to the outside world (database, OpenAI, backend API) | `repository.py` | `data/` (repository) |
-| Models | The shapes of the data | `schemas.py` (Pydantic), `models/` (SQLAlchemy tables, one per file) | `models/` (one model per file) |
+| Models | The shapes of the data | `schemas/` (Pydantic, one per file), `models/` (SQLAlchemy tables, one per file) | `models/` (one model per file) |
 
 Rules:
 

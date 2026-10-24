@@ -148,24 +148,24 @@ backend/app/
 │   └── auth.py                  # Supabase JWT verification and get_current_user dependency
 └── features/
     ├── documents/
-    │   ├── schemas.py               # SourceDocument, Chunk
+    │   ├── schemas/                 # SourceDocument, Chunk
     │   ├── models/                  # source_document.py, document_chunk.py (one table per file)
     │   ├── chunker.py               # Pure chunking rules (size, overlap, page/section metadata)
     │   ├── repository.py            # Store and read documents, chunks, embeddings
     │   └── service.py               # Ingestion: parse → chunk → embed → store
     ├── retrieval/
-    │   ├── schemas.py               # SourcePassage
+    │   ├── schemas/                 # SourcePassage
     │   ├── fusion.py                # Pure Reciprocal Rank Fusion
     │   ├── repository.py            # pgvector and full-text SQL queries, neighbor chunks
     │   └── service.py               # Query → fused, ranked source passages
     ├── assistant/
-    │   ├── schemas.py               # GroundedAnswer, Citation, DocumentAgentDeps
+    │   ├── schemas/                 # GroundedAnswer, Citation, DocumentAgentDeps
     │   ├── grounding.py             # Pure check: every citation maps to a retrieved passage
     │   ├── agent.py                 # PydanticAI agent definition and tools
     │   ├── instructions.md          # System instructions and product contract
     │   └── service.py               # Run the agent, then enforce grounding
     └── chat/
-        ├── schemas.py               # Request bodies, thread and message responses, stream events
+        ├── schemas/                 # Request bodies, thread and message responses, stream events
         ├── models/                  # chat_thread.py, chat_message.py, message_citation.py
         ├── repository.py            # Threads, messages, citation records
         ├── service.py               # One chat turn: retrieve → assistant → stream → persist
