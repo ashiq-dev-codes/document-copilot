@@ -1,3 +1,5 @@
+"""chat_threads table."""
+
 import uuid
 from datetime import datetime
 
@@ -8,6 +10,8 @@ from app.core.database import Base
 
 
 class ChatThread(Base):
+    """One conversation, owned by one user."""
+
     __tablename__ = "chat_threads"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)

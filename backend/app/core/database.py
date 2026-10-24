@@ -1,3 +1,5 @@
+"""Database connection: the table base class and a session per request."""
+
 from collections.abc import AsyncIterator
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -13,7 +15,7 @@ DATABASE_URL = settings.database_url.replace(
 
 
 class Base(DeclarativeBase):
-    pass
+    """Parent of every table; Alembic reads all tables from it."""
 
 
 engine = create_async_engine(DATABASE_URL)
@@ -21,5 +23,6 @@ SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
 
 async def get_session() -> AsyncIterator[AsyncSession]:
+    """Opens a database session for one request and closes it afterwards."""
     async with SessionLocal() as session:
         yield session

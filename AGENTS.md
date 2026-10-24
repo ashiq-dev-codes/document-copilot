@@ -83,5 +83,10 @@ Fail fast on startup if required config is missing. No silent fallbacks that hid
 - **No error handling for cases that can't happen.** Trust internal callers and framework guarantees. Validate only at boundaries: HTTP input, external APIs, DB writes, untrusted parsing.
 - **No backwards-compat shims** unless explicitly asked for.
 - **No feature flags** added speculatively.
-- **Comments:** explain *why* when non-obvious, never *what*. Remove stale TODOs.
-- **Keep files focused.** Prefer small modules.
+- **One job per function.** When a function does several steps, move each step into a small, well-named private helper (`_fetch_supabase_user`), so the main function reads like a summary.
+- **Same order in every file:** imports → constants → types/models → public functions and classes → private helpers (`_name`). Readers see what a file offers first and the details last.
+- **Short, plain comments:**
+  - Every file starts with a one-line description of its job (Python: module docstring; Dart: `///` on the main class).
+  - Every public class and function gets a one-line description of what it's for.
+  - Inline comments explain *why*, never *what*. Remove stale TODOs.
+- **Keep files focused.** Prefer small modules. In folders, things that multiply (tables, schemas, models) get a folder with one class per file; things that are one-per-feature (router, service, repository) stay a single file.

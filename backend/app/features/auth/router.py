@@ -1,3 +1,5 @@
+"""Auth endpoints."""
+
 from fastapi import APIRouter
 
 from app.core.auth import CurrentUserDep

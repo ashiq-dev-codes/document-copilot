@@ -1,3 +1,5 @@
+"""chat_messages table."""
+
 import uuid
 from datetime import datetime
 
@@ -8,6 +10,8 @@ from app.core.database import Base
 
 
 class ChatMessage(Base):
+    """One question or answer inside a thread."""
+
     __tablename__ = "chat_messages"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)

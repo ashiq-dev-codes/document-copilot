@@ -1,3 +1,5 @@
+"""source_documents table."""
+
 import uuid
 from datetime import date, datetime
 
@@ -8,6 +10,8 @@ from app.core.database import Base
 
 
 class SourceDocument(Base):
+    """One SEC filing, e.g. Apple's 2024 10-K."""
+
     __tablename__ = "source_documents"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)

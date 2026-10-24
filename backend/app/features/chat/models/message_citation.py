@@ -1,3 +1,5 @@
+"""message_citations table."""
+
 import uuid
 
 from sqlalchemy import ForeignKey
@@ -7,6 +9,8 @@ from app.core.database import Base
 
 
 class MessageCitation(Base):
+    """Links a [n] marker in an answer to the chunk it quotes."""
+
     __tablename__ = "message_citations"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)

@@ -1,3 +1,5 @@
+"""App settings, read from backend/.env and checked at startup."""
+
 from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -7,6 +9,8 @@ ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
 
 
 class Settings(BaseSettings):
+    """Every setting the backend needs; the app won't start if one is missing."""
+
     model_config = SettingsConfigDict(env_file=ENV_FILE)
 
     # Supabase

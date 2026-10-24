@@ -1,3 +1,5 @@
+"""document_chunks table."""
+
 import uuid
 
 from pgvector.sqlalchemy import Vector
@@ -10,6 +12,8 @@ from app.core.database import Base
 
 
 class DocumentChunk(Base):
+    """One small piece of a filing, with its embedding for search."""
+
     __tablename__ = "document_chunks"
     __table_args__ = (
         # Fast "nearest meaning" search over embeddings.
