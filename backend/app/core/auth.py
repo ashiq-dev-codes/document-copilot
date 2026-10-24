@@ -42,6 +42,9 @@ async def get_current_user(
     raise _unauthorized("Invalid or expired token")
 
 
+# Helpers
+
+
 # Add `user: CurrentUserDep` to any endpoint that needs a signed-in user.
 CurrentUserDep = Annotated[CurrentUser, Depends(get_current_user)]
 
