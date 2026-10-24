@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 
-const primary = Color.fromARGB(255, 239, 239, 239);
+/// The app's colors. Brand colors come from accent700 and are pinned here
+/// (not generated at runtime) so they never shift after a Flutter upgrade.
+abstract final class AppColors {
+  // Brand (light-mode values). In widgets, prefer Theme.of(context).colorScheme,
+  // which switches between lightScheme and darkScheme automatically.
+  static const Color primary = Color(0xFF515B92);
+  static const Color secondary = Color(0xFF5B5D72);
+  static const Color tertiary = Color(0xFF77536D);
 
-class AppColors {
   // Base Colors
   static const Color white = Color(0xFFFFFFFF);
   static const Color black = Color(0xFF000000);
-  static const Color primary = Color(0xFF000000);
-  static const Color secondary = Color(0xFFFFFFFF);
 
   // Accent Colors
   static const Color accent100 = Color(0xFFFCFCFD);
@@ -69,9 +73,80 @@ class AppColors {
   static const Color warning900 = Color(0xFF7A2E0E);
   static const Color warning950 = Color(0xFF4E1D09);
 
-  // Add secondary and other colors similarly...
-
   // Gray color shades
   static const Color paleGrayColor = Color(0xFFDCDCDC);
   static const Color gainsboroColor = Color(0xFFD8D8D8);
+
+  // Full light and dark color sets used by AppTheme.
+  static const ColorScheme lightScheme = ColorScheme(
+    brightness: Brightness.light,
+    primary: Color(0xFF515B92),
+    onPrimary: Color(0xFFFFFFFF),
+    primaryContainer: Color(0xFFDEE0FF),
+    onPrimaryContainer: Color(0xFF394379),
+    secondary: Color(0xFF5B5D72),
+    onSecondary: Color(0xFFFFFFFF),
+    secondaryContainer: Color(0xFFE0E1F9),
+    onSecondaryContainer: Color(0xFF434659),
+    tertiary: Color(0xFF77536D),
+    onTertiary: Color(0xFFFFFFFF),
+    tertiaryContainer: Color(0xFFFFD7F1),
+    onTertiaryContainer: Color(0xFF5D3C55),
+    error: Color(0xFFBA1A1A),
+    onError: Color(0xFFFFFFFF),
+    errorContainer: Color(0xFFFFDAD6),
+    onErrorContainer: Color(0xFF93000A),
+    surface: Color(0xFFFBF8FF),
+    onSurface: Color(0xFF1B1B21),
+    onSurfaceVariant: Color(0xFF46464F),
+    surfaceContainerLowest: Color(0xFFFFFFFF),
+    surfaceContainerLow: Color(0xFFF5F2FA),
+    surfaceContainer: Color(0xFFEFEDF4),
+    surfaceContainerHigh: Color(0xFFE9E7EF),
+    surfaceContainerHighest: Color(0xFFE4E1E9),
+    outline: Color(0xFF767680),
+    outlineVariant: Color(0xFFC7C5D0),
+    shadow: Color(0xFF000000),
+    scrim: Color(0xFF000000),
+    inverseSurface: Color(0xFF303036),
+    onInverseSurface: Color(0xFFF2EFF7),
+    inversePrimary: Color(0xFFBAC3FF),
+    surfaceTint: Color(0xFF515B92),
+  );
+
+  static const ColorScheme darkScheme = ColorScheme(
+    brightness: Brightness.dark,
+    primary: Color(0xFFBAC3FF),
+    onPrimary: Color(0xFF222C61),
+    primaryContainer: Color(0xFF394379),
+    onPrimaryContainer: Color(0xFFDEE0FF),
+    secondary: Color(0xFFC3C5DD),
+    onSecondary: Color(0xFF2D2F42),
+    secondaryContainer: Color(0xFF434659),
+    onSecondaryContainer: Color(0xFFE0E1F9),
+    tertiary: Color(0xFFE5BAD7),
+    onTertiary: Color(0xFF44263D),
+    tertiaryContainer: Color(0xFF5D3C55),
+    onTertiaryContainer: Color(0xFFFFD7F1),
+    error: Color(0xFFFFB4AB),
+    onError: Color(0xFF690005),
+    errorContainer: Color(0xFF93000A),
+    onErrorContainer: Color(0xFFFFDAD6),
+    surface: Color(0xFF121318),
+    onSurface: Color(0xFFE4E1E9),
+    onSurfaceVariant: Color(0xFFC7C5D0),
+    surfaceContainerLowest: Color(0xFF0D0E13),
+    surfaceContainerLow: Color(0xFF1B1B21),
+    surfaceContainer: Color(0xFF1F1F25),
+    surfaceContainerHigh: Color(0xFF29292F),
+    surfaceContainerHighest: Color(0xFF34343A),
+    outline: Color(0xFF90909A),
+    outlineVariant: Color(0xFF46464F),
+    shadow: Color(0xFF000000),
+    scrim: Color(0xFF000000),
+    inverseSurface: Color(0xFFE4E1E9),
+    onInverseSurface: Color(0xFF303036),
+    inversePrimary: Color(0xFF515B92),
+    surfaceTint: Color(0xFFBAC3FF),
+  );
 }

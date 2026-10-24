@@ -5,16 +5,12 @@ import 'package:document_copilot/shared/theme/app_colors.dart';
 /// The app's look in one place: colors, text fields, buttons and snackbars,
 /// for light and dark mode. Screens use the defaults instead of styling widgets.
 abstract final class AppTheme {
-  static ThemeData get light => _build(Brightness.light);
-  static ThemeData get dark => _build(Brightness.dark);
+  static ThemeData get light => _build(AppColors.lightScheme);
+  static ThemeData get dark => _build(AppColors.darkScheme);
 
   static const _radius = 12.0;
 
-  static ThemeData _build(Brightness brightness) {
-    final colors = ColorScheme.fromSeed(
-      seedColor: AppColors.accent700,
-      brightness: brightness,
-    );
+  static ThemeData _build(ColorScheme colors) {
     final rounded = BorderRadius.circular(_radius);
 
     return ThemeData(
