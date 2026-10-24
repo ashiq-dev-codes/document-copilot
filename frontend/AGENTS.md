@@ -38,15 +38,16 @@ Follows the simple, feature-first architecture in [../AGENTS.md](../AGENTS.md#ar
 ```text
 frontend/
 ├── lib/
-│   ├── main.dart                  # Reads config, registers dependencies, runs the app
-│   ├── app.dart                   # MaterialApp, theme, auth gate
+│   ├── main.dart                  # Starts Supabase, calls initDependencies(), runs AppRoot
+│   ├── injection_container.dart   # `sl` (get_it) + initDependencies(): shared services, then each feature's init<Name>Injection(sl)
+│   ├── root.dart                  # AppRoot: everything around the app (keyboard dismiss, MultiBlocProvider for app-wide Cubits only)
+│   ├── app.dart                   # App: the MaterialApp only (theme, inspector overlay, auth gate)
 │   ├── core/                      # Shared plumbing only, no feature logic
 │   │   ├── config/config.dart     # AppConfig: environment, backend URL, Supabase project
 │   │   ├── network/
 │   │   │   ├── api_client.dart    # Dio: base URL, timeouts, interceptors
 │   │   │   ├── auth_interceptor.dart  # Adds the Supabase token to every request
 │   │   │   └── api_exception.dart # Turns a failed call into one user-facing message
-│   │   ├── di.dart                # get_it registrations
 │   │   ├── theme/                 # Colors, text styles
 │   │   └── widgets/               # Shared widgets (buttons, inputs, loaders)
 │   └── features/
@@ -59,6 +60,7 @@ Inside each feature (only the parts it needs):
 
 ```text
 features/<name>/
+├── <name>_injection.dart          # init<Name>Injection(sl) registers this feature's repository and Cubits
 ├── data/
 │   └── <name>_repository.dart     # Calls the backend through core/network/api_client.dart
 ├── models/                        # One model per file, hand-written fromJson / toJson
@@ -70,7 +72,11 @@ features/<name>/
 
 - Pages read Cubits; Cubits call the repository; only `data/` calls `api_client.dart`.
 - No abstract repository + impl pair by default: tests can `implements` the concrete class.
-- Register each feature's repository and Cubits in `core/di.dart`.
+- **Adding a feature:** register its repository and Cubits in `features/<name>/<name>_injection.dart` (`init<Name>Injection(GetIt sl)`), and call it from `initDependencies()` in `injection_container.dart`.
+- **How things live:**
+  - Repositories and Dio are stateless and shared: `registerLazySingleton`.
+  - Screen Cubits hold one screen's state: `registerFactory`, provided with `BlocProvider(create: (_) => sl<XCubit>())` on the page that uses them, so each visit starts fresh and the Cubit closes when the page leaves. No `clear()` methods.
+  - App-wide Cubits (e.g. `AuthCubit`, needed by the auth gate everywhere): `registerLazySingleton`, provided once in `root.dart`'s `MultiBlocProvider`. Keep this list short.
 
 ## Code style (frontend-specific)
 

@@ -6,7 +6,10 @@ import 'package:document_copilot/core/network/api_client.dart';
 /// The app-wide service locator.
 final sl = GetIt.instance;
 
-/// Registers shared services. Each feature adds its repositories and Cubits here.
-void setupDependencies() {
+/// Registers shared services, then each feature's own dependencies.
+void initDependencies() {
+  // Shared
   sl.registerLazySingleton<Dio>(createApiClient);
+
+  // Features: add `init<Name>Injection(sl);` for each feature.
 }
