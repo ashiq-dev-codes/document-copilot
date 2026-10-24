@@ -6,6 +6,7 @@ import 'package:document_copilot/core/config/config.dart';
 import 'package:document_copilot/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:document_copilot/features/auth/presentation/pages/account_page.dart';
 import 'package:document_copilot/features/auth/presentation/pages/sign_in_page.dart';
+import 'package:document_copilot/shared/theme/app_theme.dart';
 
 /// The MaterialApp: theme, debug inspector, and the auth gate as the first page.
 class App extends StatelessWidget {
@@ -16,7 +17,8 @@ class App extends StatelessWidget {
     return MaterialApp(
       title: 'Document Copilot',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorSchemeSeed: Colors.indigo),
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
       // A floating button opens corextra's network and log inspector (see AppConfig).
       builder: (context, child) => CorextraDevToolsOverlay(
         enabled: AppConfig.isDevToolsEnabled,

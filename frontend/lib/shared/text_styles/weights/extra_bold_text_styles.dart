@@ -11,7 +11,7 @@ class ExtraBoldTextStyles extends AppTextStyles {
       fontSize: size,
       fontFamily: fontFamily,
       fontWeight: FontWeight.w800,
-      color: color ?? Colors.black,
+      color: color,
     );
   }
 }

@@ -50,7 +50,9 @@ frontend/
 │   ├── shared/                    # Reusable building blocks for every feature (ZERO.40 style)
 │   │   ├── constant/constant.dart # Shared sizes and spacing (kHeight10, ...)
 │   │   ├── text_styles/           # AppText (by weight), sizes/AppFontSize
-│   │   ├── theme/app_colors.dart  # AppColors
+│   │   ├── theme/
+│   │   │   ├── app_colors.dart    # AppColors palette (feeds AppTheme)
+│   │   │   └── app_theme.dart     # AppTheme.light / .dark: fields, buttons, snackbars
 │   │   ├── utils/
 │   │   │   ├── dio/app_interceptor.dart       # Supabase token on every request; on 401 refresh + retry once, else sign out
 │   │   │   └── exception/api_exception.dart   # Turns a failed call into one user-facing message
@@ -88,7 +90,10 @@ features/<name>/
 - **Small widgets.** Extract a widget class when a build method gets long; prefer classes over helper methods that return widgets.
 - **Cubit states are `sealed` classes** (`ChatInitial`, `ChatLoading`, `ChatLoaded`, `ChatFailure`).
 - **`const` constructors** wherever possible.
+- **Look comes from `AppTheme`** (light and dark). Use plain `TextFormField`, `FilledButton`, etc. and let the theme style them; don't style individual widgets. A new shared look (e.g. cards) is added to `AppTheme`, not to a page.
+- **Colors in features:** `Theme.of(context).colorScheme.<role>` (primary, onSurfaceVariant, error, ...), so dark mode works. `AppColors` only feeds `AppTheme`.
 - **Text:** `AppText.<weight>.textStyle(size: AppFontSize.sXX)`; no inline `TextStyle(...)` in features. Leave `color` null to follow the theme.
+- **Spacing:** the `kHeightXX` / `kWidthXX` constants from `shared/constant/constant.dart`.
 - **Messages:** `CustomSnackBar.show / success / error(context, message)`; never call `ScaffoldMessenger` directly.
 - **Before writing a widget or helper,** check `lib/shared/` (and `corextra`) first. A widget used by two or more features moves into `shared/widgets/`.
 - **Package imports** (`package:document_copilot/...`), not relative imports across features.

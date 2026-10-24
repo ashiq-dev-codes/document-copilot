@@ -11,7 +11,7 @@ class RegularTextStyles extends AppTextStyles {
       fontSize: size,
       fontFamily: fontFamily,
       fontWeight: FontWeight.w400,
-      color: color ?? Colors.black,
+      color: color,
     );
   }
 }

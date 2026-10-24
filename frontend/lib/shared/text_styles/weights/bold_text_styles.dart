@@ -11,7 +11,7 @@ class BoldTextStyles extends AppTextStyles {
       fontSize: size,
       fontFamily: fontFamily,
       fontWeight: FontWeight.w700,
-      color: color ?? Colors.black,
+      color: color,
     );
   }
 }

@@ -11,7 +11,7 @@ class MediumTextStyles extends AppTextStyles {
       fontSize: size,
       fontFamily: fontFamily,
       fontWeight: FontWeight.w500,
-      color: color ?? Colors.black,
+      color: color,
     );
   }
 }

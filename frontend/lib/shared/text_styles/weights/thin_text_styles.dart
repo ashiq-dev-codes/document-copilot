@@ -11,7 +11,7 @@ class ThinTextStyles extends AppTextStyles {
       fontSize: size,
       fontFamily: fontFamily,
       fontWeight: FontWeight.w200,
-      color: color ?? Colors.black,
+      color: color,
     );
   }
 }

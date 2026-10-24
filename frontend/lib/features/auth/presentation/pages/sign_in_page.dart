@@ -4,11 +4,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:document_copilot/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:document_copilot/shared/text_styles/sizes/app_font_size.dart';
+import 'package:document_copilot/features/auth/presentation/widgets/auth_header.dart';
+import 'package:document_copilot/features/auth/presentation/widgets/password_field.dart';
+import 'package:document_copilot/shared/constant/constant.dart';
 import 'package:document_copilot/shared/text_styles/app_text.dart';
+import 'package:document_copilot/shared/text_styles/sizes/app_font_size.dart';
 import 'package:document_copilot/shared/widgets/snackbar/custom_snack_bar.dart';
 
-/// Email and password form to sign in or create an account.
+/// Sign in, or switch to creating an account, with email and password.
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
 
@@ -20,6 +23,7 @@ class _SignInPageState extends State<SignInPage> {
   final _formKey = GlobalKey<FormState>();
   final _email = TextEditingController();
   final _password = TextEditingController();
+  bool _isCreatingAccount = false;
 
   @override
   void dispose() {
@@ -28,13 +32,18 @@ class _SignInPageState extends State<SignInPage> {
     super.dispose();
   }
 
-  void _submit({required bool createAccount}) {
+  void _submit() {
     if (!_formKey.currentState!.validate()) return;
     final cubit = context.read<AuthCubit>();
     final email = _email.text.trim();
-    createAccount
+    _isCreatingAccount
         ? cubit.signUp(email, _password.text)
         : cubit.signIn(email, _password.text);
+  }
+
+  void _toggleMode() {
+    _formKey.currentState?.reset();
+    setState(() => _isCreatingAccount = !_isCreatingAccount);
   }
 
   @override
@@ -56,60 +65,60 @@ class _SignInPageState extends State<SignInPage> {
                   final busy = state is AuthSubmitting;
                   return Form(
                     key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          'Document Copilot',
-                          textAlign: TextAlign.center,
-                          style: AppText.bold.textStyle(size: AppFontSize.s30),
-                        ),
-                        const SizedBox(height: 32),
-                        TextFormField(
-                          controller: _email,
-                          decoration: const InputDecoration(
-                            labelText: 'Email',
-                            prefixIcon: Icon(LucideIcons.mail),
+                    child: AutofillGroup(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          AuthHeader(
+                            title: _isCreatingAccount
+                                ? 'Create your account'
+                                : 'Welcome back',
+                            subtitle: 'Ask questions about company filings and get answers with sources.',
                           ),
-                          keyboardType: TextInputType.emailAddress,
-                          autofillHints: const [AutofillHints.email],
-                          validator: FormValidators.email,
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _password,
-                          decoration: const InputDecoration(
-                            labelText: 'Password',
-                            prefixIcon: Icon(LucideIcons.lock),
+                          kHeight30,
+                          TextFormField(
+                            controller: _email,
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                            autofillHints: const [AutofillHints.email],
+                            validator: FormValidators.email,
+                            decoration: const InputDecoration(
+                              labelText: 'Email',
+                              hintText: 'you@company.com',
+                              prefixIcon: Icon(LucideIcons.mail),
+                            ),
                           ),
-                          obscureText: true,
-                          autofillHints: const [AutofillHints.password],
-                          validator: FormValidators.password,
-                          onFieldSubmitted: (_) =>
-                              _submit(createAccount: false),
-                        ),
-                        const SizedBox(height: 24),
-                        FilledButton(
-                          onPressed: busy
-                              ? null
-                              : () => _submit(createAccount: false),
-                          child: busy
-                              ? const SizedBox.square(
-                                  dimension: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
+                          kHeight15,
+                          PasswordField(
+                            controller: _password,
+                            onSubmitted: _submit,
+                            helperText: _isCreatingAccount
+                                ? 'At least 6 characters'
+                                : null,
+                          ),
+                          kHeight25,
+                          FilledButton(
+                            onPressed: busy ? null : _submit,
+                            child: busy
+                                ? const SizedBox.square(
+                                    dimension: 22,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.5,
+                                    ),
+                                  )
+                                : Text(
+                                    _isCreatingAccount
+                                        ? 'Create account'
+                                        : 'Sign in',
                                   ),
-                                )
-                              : const Text('Sign in'),
-                        ),
-                        const SizedBox(height: 8),
-                        TextButton(
-                          onPressed: busy
-                              ? null
-                              : () => _submit(createAccount: true),
-                          child: const Text('Create account'),
-                        ),
-                      ],
+                          ),
+                          kHeight15,
+                          _ModeSwitch(
+                            isCreatingAccount: _isCreatingAccount,
+                            onPressed: busy ? null : _toggleMode,
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -118,6 +127,35 @@ class _SignInPageState extends State<SignInPage> {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// "New here? Create an account" / "Already have an account? Sign in".
+class _ModeSwitch extends StatelessWidget {
+  const _ModeSwitch({required this.isCreatingAccount, required this.onPressed});
+
+  final bool isCreatingAccount;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Text(
+          isCreatingAccount ? 'Already have an account?' : 'New here?',
+          style: AppText.regular.textStyle(
+            size: AppFontSize.s14,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+        TextButton(
+          onPressed: onPressed,
+          child: Text(isCreatingAccount ? 'Sign in' : 'Create an account'),
+        ),
+      ],
     );
   }
 }

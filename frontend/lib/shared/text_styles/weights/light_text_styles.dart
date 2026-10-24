@@ -11,7 +11,7 @@ class LightTextStyles extends AppTextStyles {
       fontSize: size,
       fontFamily: fontFamily,
       fontWeight: FontWeight.w300,
-      color: color ?? Colors.black,
+      color: color,
     );
   }
 }

@@ -11,7 +11,7 @@ class SemiBoldTextStyles extends AppTextStyles {
       fontSize: size,
       fontFamily: fontFamily,
       fontWeight: FontWeight.w600,
-      color: color ?? Colors.black,
+      color: color,
     );
   }
 }

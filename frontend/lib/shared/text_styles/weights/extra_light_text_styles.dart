@@ -11,7 +11,7 @@ class ExtraLightTextStyles extends AppTextStyles {
       fontSize: size,
       fontFamily: fontFamily,
       fontWeight: FontWeight.w100,
-      color: color ?? Colors.black,
+      color: color,
     );
   }
 }

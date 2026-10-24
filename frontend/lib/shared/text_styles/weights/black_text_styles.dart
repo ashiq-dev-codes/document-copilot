@@ -11,7 +11,7 @@ class BlackTextStyles extends AppTextStyles {
       fontSize: size,
       fontFamily: fontFamily,
       fontWeight: FontWeight.w900,
-      color: color ?? Colors.black,
+      color: color,
     );
   }
 }
