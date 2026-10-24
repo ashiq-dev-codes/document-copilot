@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:document_copilot/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:document_copilot/shared/text_styles/app_font_size.dart';
+import 'package:document_copilot/shared/text_styles/sizes/app_font_size.dart';
 import 'package:document_copilot/shared/text_styles/app_text.dart';
 import 'package:document_copilot/shared/widgets/snackbar/custom_snack_bar.dart';
 
@@ -62,7 +62,7 @@ class _SignInPageState extends State<SignInPage> {
                         Text(
                           'Document Copilot',
                           textAlign: TextAlign.center,
-                          style: AppText.bold.textStyle(size: AppFontSize.s28),
+                          style: AppText.bold.textStyle(size: AppFontSize.s30),
                         ),
                         const SizedBox(height: 32),
                         TextFormField(

@@ -1,10 +1,11 @@
-import 'dart:io';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 // Widgets height
 const double kAppBarHeight = 78;
-final double kNavBarHeight = Platform.isAndroid ? 75 : 51;
+final double kNavBarHeight = defaultTargetPlatform == TargetPlatform.android
+    ? 75
+    : 51;
 
 // Constant Empty Height
 const kHeight5 = SizedBox(height: 5);

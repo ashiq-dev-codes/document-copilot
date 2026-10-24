@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app_template/shared/theme/app_colors.dart';
+import 'package:document_copilot/shared/theme/app_colors.dart';
 
 class CustomOutlinedButton extends StatelessWidget {
   const CustomOutlinedButton({

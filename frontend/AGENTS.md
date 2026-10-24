@@ -48,9 +48,11 @@ frontend/
 │   │   ├── config/config.dart     # AppConfig: environment, distribution, backend URL, Supabase project
 │   │   └── network/api_client.dart  # Dio: base URL, timeouts, interceptors
 │   ├── shared/                    # Reusable building blocks for every feature (ZERO.40 style)
-│   │   ├── text_styles/           # AppText (by weight) + AppFontSize
+│   │   ├── constant/constant.dart # Shared sizes and spacing (kHeight10, ...)
+│   │   ├── text_styles/           # AppText (by weight), sizes/AppFontSize
+│   │   ├── theme/app_colors.dart  # AppColors
 │   │   ├── utils/
-│   │   │   ├── dio/auth_interceptor.dart      # Adds the Supabase token to every request
+│   │   │   ├── dio/app_interceptor.dart       # Supabase token on every request; on 401 refresh + retry once, else sign out
 │   │   │   └── exception/api_exception.dart   # Turns a failed call into one user-facing message
 │   │   └── widgets/               # Shared widgets, one folder per kind (snackbar/custom_snack_bar.dart)
 │   └── features/
@@ -104,7 +106,8 @@ features/<name>/
 - Talks to the FastAPI backend over JSON. Base URL comes from `AppConfig.apiBaseUrl`.
 - The web build runs in a browser, so the backend must list its address in `ALLOWED_ORIGINS` (CORS). Run it on a fixed port (`flutter run -d chrome --web-port 3000`) so the address matches. Native apps don't need this.
 - On a phone or emulator, `localhost` means the device itself. The `local` environment points at your computer's network IP (use `10.0.2.2` on the Android emulator); update it in `config.dart` if your Mac's IP changes.
-- The Supabase access token is added to every request by `AuthInterceptor`; never pass tokens through widget constructors.
+- The Supabase access token is added to every request by `AppInterceptor`; never pass tokens through widget constructors.
+- **Supabase owns the session.** `supabase_flutter` stores it on the device, restores it on launch (auto-login) and refreshes it about every hour. Never copy the token into `AppStorage`/`SharedPreferences`: the copy goes stale after the first refresh and causes 401s.
 - Repositories catch `DioException` and rethrow `ApiException.fromDio(e)`, so Cubits only ever see one error type with a ready-to-show `message` (the backend's `detail`, or a friendly network message).
 - Calling the local `http://` backend is allowed only for development: Android debug builds (`usesCleartextTraffic` in the debug manifest), iOS local network (`NSAllowsLocalNetworking`), and the macOS network-client entitlement. Production uses `https`.
 
@@ -121,4 +124,6 @@ features/<name>/
 - Inline `TextStyle(...)` or direct `ScaffoldMessenger` calls in features.
 - Calling Dio or Supabase directly from a page or widget.
 - Secrets in `config.dart` or anywhere in the app.
+- `dart:io`'s `Platform` in shared or UI code: it throws on web. Use `defaultTargetPlatform` or `kIsWeb` from `package:flutter/foundation.dart`.
+- Storing the auth token yourself (Supabase already does).
 - Direct OpenAI calls from the app — FastAPI owns every AI call.

@@ -1,7 +1,7 @@
 import 'package:corextra/corextra.dart';
 import 'package:dio/dio.dart';
 import 'package:document_copilot/core/config/config.dart';
-import 'package:document_copilot/shared/utils/dio/dio_intrepters.dart';
+import 'package:document_copilot/shared/utils/dio/app_interceptor.dart';
 import 'package:flutter/foundation.dart';
 
 /// Builds the one Dio client every feature uses to call our backend.
@@ -18,7 +18,7 @@ Dio createApiClient() {
   );
 
   dio.interceptors.addAll([
-    AuthInterceptor(),
+    AppInterceptor(dio),
     const AppLoggerInterceptor(enabled: kDebugMode),
     // Hides the token in the in-app network inspector.
     const CorextraDevToolsInterceptor(hiddenHeaders: {'Authorization'}),
