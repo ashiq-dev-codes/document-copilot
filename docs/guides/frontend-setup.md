@@ -12,6 +12,8 @@ flutter pub add flutter_bloc get_it dio supabase_flutter
 
 `flutter create .` adds the project files around the existing `AGENTS.md`, `env.json` and `env.example.json`.
 
+The app ID is `com.documentcopilot.app` on both platforms (Android `applicationId` in `android/app/build.gradle.kts`, iOS bundle identifier in Xcode). `flutter create` generates `com.documentcopilot.document_copilot`, so it was changed by hand once; the Dart package name stays `document_copilot`.
+
 ## Settings
 
 Copy `env.example.json` to `env.json` (gitignored) and fill in the values:

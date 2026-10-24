@@ -1,4 +1,4 @@
-package com.documentcopilot.document_copilot
+package com.documentcopilot.app
 
 import io.flutter.embedding.android.FlutterActivity
 
