@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:document_copilot/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:document_copilot/features/auth/presentation/widgets/auth_header.dart';
+import 'package:document_copilot/features/auth/presentation/widgets/auth_layout.dart';
 import 'package:document_copilot/features/auth/presentation/widgets/password_field.dart';
 import 'package:document_copilot/shared/constant/constant.dart';
 import 'package:document_copilot/shared/text_styles/app_text.dart';
@@ -48,84 +49,72 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 400),
-              child: BlocConsumer<AuthCubit, AuthState>(
-                listener: (context, state) {
-                  if (state is AuthFailure) {
-                    CustomSnackBar.error(context, state.message);
-                  }
-                },
-                builder: (context, state) {
-                  final busy = state is AuthSubmitting;
-                  return Form(
-                    key: _formKey,
-                    child: AutofillGroup(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          AuthHeader(
-                            title: _isCreatingAccount
-                                ? 'Create your account'
-                                : 'Welcome back',
-                            subtitle: 'Ask questions about company filings and get answers with sources.',
-                          ),
-                          kHeight30,
-                          TextFormField(
-                            controller: _email,
-                            keyboardType: TextInputType.emailAddress,
-                            textInputAction: TextInputAction.next,
-                            autofillHints: const [AutofillHints.email],
-                            validator: FormValidators.email,
-                            decoration: const InputDecoration(
-                              labelText: 'Email',
-                              hintText: 'you@company.com',
-                              prefixIcon: Icon(LucideIcons.mail),
-                            ),
-                          ),
-                          kHeight15,
-                          PasswordField(
-                            controller: _password,
-                            onSubmitted: _submit,
-                            helperText: _isCreatingAccount
-                                ? 'At least 6 characters'
-                                : null,
-                          ),
-                          kHeight25,
-                          FilledButton(
-                            onPressed: busy ? null : _submit,
-                            child: busy
-                                ? const SizedBox.square(
-                                    dimension: 22,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2.5,
-                                    ),
-                                  )
-                                : Text(
-                                    _isCreatingAccount
-                                        ? 'Create account'
-                                        : 'Sign in',
-                                  ),
-                          ),
-                          kHeight15,
-                          _ModeSwitch(
-                            isCreatingAccount: _isCreatingAccount,
-                            onPressed: busy ? null : _toggleMode,
-                          ),
-                        ],
-                      ),
+    return AuthLayout(
+      child: BlocConsumer<AuthCubit, AuthState>(
+        listener: (context, state) {
+          if (state is AuthFailure) {
+            CustomSnackBar.error(context, state.message);
+          }
+        },
+        builder: (context, state) {
+          final busy = state is AuthSubmitting;
+          return Form(
+            key: _formKey,
+            child: AutofillGroup(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  AuthHeader(
+                    title: _isCreatingAccount
+                        ? 'Create your account'
+                        : 'Welcome back',
+                    subtitle: _isCreatingAccount
+                        ? 'Start asking questions about company filings.'
+                        : 'Sign in to continue your research.',
+                  ),
+                  kHeight30,
+                  TextFormField(
+                    controller: _email,
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    autofillHints: const [AutofillHints.email],
+                    validator: FormValidators.email,
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                      hintText: 'you@company.com',
+                      prefixIcon: Icon(LucideIcons.mail),
                     ),
-                  );
-                },
+                  ),
+                  kHeight15,
+                  PasswordField(
+                    controller: _password,
+                    onSubmitted: _submit,
+                    helperText: _isCreatingAccount
+                        ? 'At least 6 characters'
+                        : null,
+                  ),
+                  kHeight25,
+                  FilledButton(
+                    onPressed: busy ? null : _submit,
+                    child: busy
+                        ? const SizedBox.square(
+                            dimension: 22,
+                            child: CircularProgressIndicator(strokeWidth: 2.5),
+                          )
+                        : Text(
+                            _isCreatingAccount ? 'Create account' : 'Sign in',
+                          ),
+                  ),
+                  kHeight15,
+                  _ModeSwitch(
+                    isCreatingAccount: _isCreatingAccount,
+                    onPressed: busy ? null : _toggleMode,
+                  ),
+                ],
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
