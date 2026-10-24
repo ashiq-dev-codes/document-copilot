@@ -44,14 +44,15 @@ frontend/
 │   ├── injection_container.dart   # `sl` (get_it) + initDependencies(): shared services, then each feature's init<Name>Injection(sl)
 │   ├── root.dart                  # AppRoot: everything around the app (keyboard dismiss, MultiBlocProvider for app-wide Cubits only)
 │   ├── app.dart                   # App: the MaterialApp only (theme, inspector overlay, auth gate)
-│   ├── core/                      # Shared plumbing only, no feature logic
-│   │   ├── config/config.dart     # AppConfig: environment, backend URL, Supabase project
-│   │   ├── network/
-│   │   │   ├── api_client.dart    # Dio: base URL, timeouts, interceptors
-│   │   │   ├── auth_interceptor.dart  # Adds the Supabase token to every request
-│   │   │   └── api_exception.dart # Turns a failed call into one user-facing message
-│   │   ├── theme/                 # Colors, text styles
-│   │   └── widgets/               # Shared widgets (buttons, inputs, loaders)
+│   ├── core/                      # App setup, created once at startup
+│   │   ├── config/config.dart     # AppConfig: environment, distribution, backend URL, Supabase project
+│   │   └── network/api_client.dart  # Dio: base URL, timeouts, interceptors
+│   ├── shared/                    # Reusable building blocks for every feature (ZERO.40 style)
+│   │   ├── text_styles/           # AppText (by weight) + AppFontSize
+│   │   ├── utils/
+│   │   │   ├── dio/auth_interceptor.dart      # Adds the Supabase token to every request
+│   │   │   └── exception/api_exception.dart   # Turns a failed call into one user-facing message
+│   │   └── widgets/               # Shared widgets, one folder per kind (snackbar/custom_snack_bar.dart)
 │   └── features/
 │       ├── auth/                  # sign in / sign up / session
 │       └── chat/                  # threads, messages, streaming, citations
@@ -85,6 +86,9 @@ features/<name>/
 - **Small widgets.** Extract a widget class when a build method gets long; prefer classes over helper methods that return widgets.
 - **Cubit states are `sealed` classes** (`ChatInitial`, `ChatLoading`, `ChatLoaded`, `ChatFailure`).
 - **`const` constructors** wherever possible.
+- **Text:** `AppText.<weight>.textStyle(size: AppFontSize.sXX)`; no inline `TextStyle(...)` in features. Leave `color` null to follow the theme.
+- **Messages:** `CustomSnackBar.show / success / error(context, message)`; never call `ScaffoldMessenger` directly.
+- **Before writing a widget or helper,** check `lib/shared/` (and `corextra`) first. A widget used by two or more features moves into `shared/widgets/`.
 - **Package imports** (`package:document_copilot/...`), not relative imports across features.
 
 ## Configuration
@@ -114,6 +118,7 @@ features/<name>/
 - A second HTTP client, state-management library, or DI container.
 - Code generation for models.
 - Material `Icons.*` instead of `LucideIcons.*`.
+- Inline `TextStyle(...)` or direct `ScaffoldMessenger` calls in features.
 - Calling Dio or Supabase directly from a page or widget.
 - Secrets in `config.dart` or anywhere in the app.
 - Direct OpenAI calls from the app — FastAPI owns every AI call.

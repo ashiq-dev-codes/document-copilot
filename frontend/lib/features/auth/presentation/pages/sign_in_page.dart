@@ -4,6 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:document_copilot/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:document_copilot/shared/text_styles/app_font_size.dart';
+import 'package:document_copilot/shared/text_styles/app_text.dart';
+import 'package:document_copilot/shared/widgets/snackbar/custom_snack_bar.dart';
 
 /// Email and password form to sign in or create an account.
 class SignInPage extends StatefulWidget {
@@ -46,8 +49,7 @@ class _SignInPageState extends State<SignInPage> {
               child: BlocConsumer<AuthCubit, AuthState>(
                 listener: (context, state) {
                   if (state is AuthFailure) {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text(state.message)));
+                    CustomSnackBar.error(context, state.message);
                   }
                 },
                 builder: (context, state) {
@@ -60,7 +62,7 @@ class _SignInPageState extends State<SignInPage> {
                         Text(
                           'Document Copilot',
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.headlineMedium,
+                          style: AppText.bold.textStyle(size: AppFontSize.s28),
                         ),
                         const SizedBox(height: 32),
                         TextFormField(

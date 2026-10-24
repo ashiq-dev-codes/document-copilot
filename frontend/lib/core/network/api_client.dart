@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:document_copilot/core/config/config.dart';
-import 'package:document_copilot/core/network/auth_interceptor.dart';
+import 'package:document_copilot/shared/utils/dio/auth_interceptor.dart';
 
 /// Builds the one Dio client every feature uses to call our backend.
 Dio createApiClient() {

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:document_copilot/core/network/api_exception.dart';
+import 'package:document_copilot/shared/utils/exception/api_exception.dart';
 import 'package:document_copilot/features/auth/data/auth_repository.dart';
 
 part 'auth_state.dart';

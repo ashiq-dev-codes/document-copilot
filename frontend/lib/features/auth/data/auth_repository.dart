@@ -1,6 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'package:document_copilot/core/network/api_exception.dart';
+import 'package:document_copilot/shared/utils/exception/api_exception.dart';
 
 /// Signs users in and out with Supabase email and password.
 class AuthRepository {

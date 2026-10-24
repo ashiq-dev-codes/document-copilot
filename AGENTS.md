@@ -45,7 +45,7 @@ Rules:
 - **No interfaces or abstract base classes by default.** Python duck typing and Dart's implicit interfaces (any class can be `implements`-ed) let a test pass a fake with the same methods. Add a `Protocol` / abstract class only when a second real implementation exists.
 - **Only the files a feature needs.** No empty files or placeholder folders.
 - **Features don't import each other's data access** (`repository.py`, `data/`). Use the other feature's service or Cubit instead.
-- **Shared plumbing only** in `backend/app/core/` and `frontend/lib/core/` (config, database and HTTP clients, auth, theme, dependency injection). No feature logic there.
+- **Shared code only** in `backend/app/core/`, `frontend/lib/core/` (app setup: config, HTTP client) and `frontend/lib/shared/` (reusable building blocks: text styles, widgets, utils). No feature logic there.
 
 ## Dependency policy
 
