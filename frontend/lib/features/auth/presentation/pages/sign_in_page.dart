@@ -1,9 +1,4 @@
 import 'package:corextra/corextra.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
-
 import 'package:document_copilot/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:document_copilot/features/auth/presentation/widgets/auth_header.dart';
 import 'package:document_copilot/features/auth/presentation/widgets/auth_layout.dart';
@@ -12,6 +7,10 @@ import 'package:document_copilot/shared/constant/constant.dart';
 import 'package:document_copilot/shared/text_styles/app_text.dart';
 import 'package:document_copilot/shared/text_styles/sizes/app_font_size.dart';
 import 'package:document_copilot/shared/widgets/snackbar/custom_snack_bar.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// Sign in, or switch to creating an account, with email and password.
 class SignInPage extends StatefulWidget {
@@ -30,6 +29,7 @@ class _SignInPageState extends State<SignInPage> {
   @override
   void initState() {
     super.initState();
+
     // Debug builds start with the shared test account, so signing in is one click.
     if (kDebugMode) {
       _email.text = 'ashiq.dev.codes+copilot-test@gmail.com';
@@ -41,6 +41,7 @@ class _SignInPageState extends State<SignInPage> {
   void dispose() {
     _email.dispose();
     _password.dispose();
+
     super.dispose();
   }
 
