@@ -131,8 +131,8 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 
 **Backend**
 
-- [ ] 🤝 `app/core/auth.py`: checks the token and returns the current user
-- [ ] 🤝 Return `401` when the token is missing or invalid
+- [x] 🤝 `app/core/auth.py`: checks the token and returns the current user
+- [x] 🤝 Return `401` when the token is missing or invalid
 
 **Frontend**
 

@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 
+from app.features.auth.router import router as auth_router
+
 app = FastAPI()
 
 
@@ -8,3 +10,6 @@ async def health() -> dict[str, str]:
     return {
         "status": "ok",
     }
+
+
+app.include_router(auth_router)
