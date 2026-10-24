@@ -101,8 +101,8 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 - [x] 🤝 `app/main.py`: the FastAPI app with a `GET /health` route (you write the route)
 - [x] ✍️ Run the server, then open `http://localhost:8000/health` and `http://localhost:8000/docs`
 - [x] 🤖 Database models, explained table by table: users, documents, chunks, chat threads, messages, citations
-- [ ] 🤖 Alembic setup and the first migration (pgvector, the embedding column, the full-text column, indexes, row-level security)
-- [ ] ✍️ Run `uv run alembic upgrade head`, then find your new tables in the Supabase dashboard
+- [x] 🤖 Alembic setup and the first migration (pgvector, the embedding column, the full-text column, indexes, row-level security)
+- [x] ✍️ Run `uv run alembic upgrade head`, then find your new tables in the Supabase dashboard
 - [ ] 🤖 `app/core/database.py`: the database clients
 
 **Learn:**
