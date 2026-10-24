@@ -9,6 +9,7 @@ This is the Flutter app for Document Copilot. It targets every Flutter platform 
 - **`get_it`** for dependency injection.
 - **`dio`** for HTTP, through one shared client in `lib/core/network/`.
 - **`device_preview`** (3.x) to check screens on other device sizes, text scales and dark mode. Enabled with `DevicePreview.enable(enabled: kDebugMode)` as the first line of `main()`; it does nothing in release builds.
+- **`lucide_icons_flutter`** for every icon in the UI.
 - **`corextra`** (our own package) for the network logger, the in-app network/log inspector (`CorextraDevToolsOverlay`, debug builds only), extensions and form validators. Check it before writing a new helper.
 - **`supabase_flutter`** for auth (email only — no Google sign-in, no SSO providers). It stores the session on the device.
 - Streaming answers come from FastAPI as Server-Sent Events, read with Dio (`ResponseType.stream`) and turned into a Dart `Stream`. No extra streaming package.
@@ -22,6 +23,7 @@ See universal policy in [../AGENTS.md](../AGENTS.md). Frontend-specific:
 - **One of each:** Dio is the only HTTP client, flutter_bloc the only state management, get_it the only DI. No `http`, `riverpod`, `provider`, `get`, etc. alongside them.
 - **Navigation:** plain `Navigator` with an auth gate. No router package unless deep links are needed.
 - **Widgets:** build small widgets from Material. Check Flutter itself before adding a UI package.
+- **Icons:** `lucide_icons_flutter` only (`LucideIcons.logOut`, `LucideIcons.mail`, ...), never Material `Icons.*`, so every screen has the same icon style.
 
 Before adding a package, check:
 
@@ -110,6 +112,7 @@ features/<name>/
 - `String.fromEnvironment` outside `core/config/config.dart`.
 - A second HTTP client, state-management library, or DI container.
 - Code generation for models.
+- Material `Icons.*` instead of `LucideIcons.*`.
 - Calling Dio or Supabase directly from a page or widget.
 - Secrets in `config.dart` or anywhere in the app.
 - Direct OpenAI calls from the app — FastAPI owns every AI call.
