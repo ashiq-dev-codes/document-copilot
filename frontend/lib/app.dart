@@ -1,3 +1,4 @@
+import 'package:corextra/corextra.dart';
 import 'package:flutter/material.dart';
 
 /// The root widget: app-wide theme and the first page.
@@ -10,6 +11,8 @@ class App extends StatelessWidget {
       title: 'Document Copilot',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(colorSchemeSeed: Colors.indigo),
+      // In debug builds, a floating button opens corextra's network and log inspector.
+      builder: (context, child) => CorextraDevToolsOverlay(child: child!),
       home: const Scaffold(body: Center(child: Text('Document Copilot'))),
     );
   }

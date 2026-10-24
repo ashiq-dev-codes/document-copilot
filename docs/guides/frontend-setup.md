@@ -7,7 +7,7 @@ This project uses a Flutter app for every Flutter platform (iOS, Android, web, m
 ```bash
 cd frontend
 flutter create . --project-name document_copilot --org com.documentcopilot --platforms ios,android,web,macos,windows,linux
-flutter pub add flutter_bloc get_it dio supabase_flutter
+flutter pub add flutter_bloc get_it dio supabase_flutter corextra
 ```
 
 The app ID is `com.documentcopilot.app` and the display name is "Document Copilot" on every platform. `flutter create` generates its own defaults, so they were changed by hand once in: `android/app/build.gradle.kts`, `android/app/src/main/AndroidManifest.xml`, `ios/Runner.xcodeproj/project.pbxproj`, `macos/Runner/Configs/AppInfo.xcconfig`, `macos/Runner.xcodeproj/project.pbxproj`, `linux/CMakeLists.txt`, `windows/runner/Runner.rc`, `web/index.html` and `web/manifest.json`. If you add a platform later, set the same values there. The Dart package name stays `document_copilot`.
@@ -23,7 +23,8 @@ All settings live in `lib/core/config/config.dart` (`AppConfig`):
 
 ```bash
 cd frontend
-flutter run                                  # local backend
+flutter run                                  # local backend (pick a device)
+flutter run -d chrome --web-port 3000        # web: fixed port so the backend's CORS allows it
 flutter run --dart-define=ENV=production     # deployed backend (after Phase 10)
 ```
 

@@ -8,6 +8,7 @@ This is the Flutter app for Document Copilot. It targets every Flutter platform 
 - **`flutter_bloc`** — Cubits only, no `Bloc` event classes.
 - **`get_it`** for dependency injection.
 - **`dio`** for HTTP, through one shared client in `lib/core/network/`.
+- **`corextra`** (our own package) for the network logger, the in-app network/log inspector (`CorextraDevToolsOverlay`, debug builds only), extensions and form validators. Check it before writing a new helper.
 - **`supabase_flutter`** for auth (email only — no Google sign-in, no SSO providers). It stores the session on the device.
 - Streaming answers come from FastAPI as Server-Sent Events, read with Dio (`ResponseType.stream`) and turned into a Dart `Stream`. No extra streaming package.
 
@@ -40,7 +41,10 @@ frontend/
 │   ├── app.dart                   # MaterialApp, theme, auth gate
 │   ├── core/                      # Shared plumbing only, no feature logic
 │   │   ├── config/config.dart     # AppConfig: environment, backend URL, Supabase project
-│   │   ├── network/api_client.dart  # Dio: base URL, Supabase bearer token, timeouts, errors
+│   │   ├── network/
+│   │   │   ├── api_client.dart    # Dio: base URL, timeouts, interceptors
+│   │   │   ├── auth_interceptor.dart  # Adds the Supabase token to every request
+│   │   │   └── api_exception.dart # Turns a failed call into one user-facing message
 │   │   ├── di.dart                # get_it registrations
 │   │   ├── theme/                 # Colors, text styles
 │   │   └── widgets/               # Shared widgets (buttons, inputs, loaders)
@@ -84,9 +88,11 @@ features/<name>/
 ## Backend integration
 
 - Talks to the FastAPI backend over JSON. Base URL comes from `AppConfig.apiBaseUrl`.
-- The web build runs in a browser, so the backend must list its address in `ALLOWED_ORIGINS` (CORS). Native apps don't need this.
+- The web build runs in a browser, so the backend must list its address in `ALLOWED_ORIGINS` (CORS). Run it on a fixed port (`flutter run -d chrome --web-port 3000`) so the address matches. Native apps don't need this.
 - On a phone or emulator, `localhost` means the device itself. The `local` environment points at your computer's network IP (use `10.0.2.2` on the Android emulator); update it in `config.dart` if your Mac's IP changes.
-- The Supabase access token is added to every request by an interceptor in `api_client.dart`; never pass tokens through widget constructors.
+- The Supabase access token is added to every request by `AuthInterceptor`; never pass tokens through widget constructors.
+- Repositories catch `DioException` and rethrow `ApiException.fromDio(e)`, so Cubits only ever see one error type with a ready-to-show `message` (the backend's `detail`, or a friendly network message).
+- Calling the local `http://` backend is allowed only for development: Android debug builds (`usesCleartextTraffic` in the debug manifest), iOS local network (`NSAllowsLocalNetworking`), and the macOS network-client entitlement. Production uses `https`.
 
 ## Testing
 

@@ -49,8 +49,10 @@ uv run alembic upgrade head
 cd backend
 uv sync
 uv run alembic upgrade head
-uv run uvicorn app.main:app --reload
+uv run uvicorn app.main:app --reload --host 0.0.0.0
 ```
+
+`--host 0.0.0.0` lets the Flutter app on a phone, tablet or emulator reach the backend through your Mac's network IP. Without it, uvicorn only accepts requests from this computer's `localhost`.
 
 ## Imports (`from app...`)
 
@@ -62,7 +64,7 @@ Preferred API server command:
 
 ```bash
 cd backend
-uv run uvicorn app.main:app --reload
+uv run uvicorn app.main:app --reload --host 0.0.0.0
 ```
 
 Direct file execution also works:
