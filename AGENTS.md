@@ -5,7 +5,7 @@ This file is the source of truth for any coding agent (Claude Code, Cursor, Code
 ## Stack
 
 - **Backend:** Python + FastAPI
-- **Frontend:** Flutter (Dart) mobile app
+- **Frontend:** Flutter (Dart) app for iOS, Android, web, macOS, Windows and Linux (the pilot ships iOS and Android)
 - **Database:** Supabase Postgres (users, chats, source documents, chunks)
 - **Migrations:** SQLAlchemy models + Alembic from the backend
 - **Retrieval:** Supabase `pgvector` + Postgres full-text search

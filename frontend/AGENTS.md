@@ -1,6 +1,6 @@
 # Frontend — agent notes
 
-This is the Flutter app for Document Copilot (iOS and Android). Read [../AGENTS.md](../AGENTS.md) first — universal building rules live there. This file adds frontend-specific conventions.
+This is the Flutter app for Document Copilot. It targets every Flutter platform (iOS, Android, web, macOS, Windows, Linux) with app ID `com.documentcopilot.app`; the pilot ships iOS and Android. Read [../AGENTS.md](../AGENTS.md) first — universal building rules live there. This file adds frontend-specific conventions.
 
 ## Stack
 
@@ -85,6 +85,7 @@ features/<name>/
 ## Backend integration
 
 - Talks to the FastAPI backend over JSON. Base URL comes from `API_BASE_URL`.
+- The web build runs in a browser, so the backend must list its address in `ALLOWED_ORIGINS` (CORS). Native apps don't need this.
 - On a phone or emulator, `localhost` means the device itself. During local development, point `API_BASE_URL` at your computer's network IP (or `10.0.2.2` on the Android emulator).
 - The Supabase access token is added to every request by an interceptor in `api_client.dart`; never pass tokens through widget constructors.
 

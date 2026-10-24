@@ -6,13 +6,13 @@ This project uses a Flutter app, so analysts can use Document Copilot on their p
 
 ```bash
 cd frontend
-flutter create . --project-name document_copilot --org com.documentcopilot --platforms ios,android
+flutter create . --project-name document_copilot --org com.documentcopilot --platforms ios,android,web,macos,windows,linux
 flutter pub add flutter_bloc get_it dio supabase_flutter
 ```
 
 `flutter create .` adds the project files around the existing `AGENTS.md`, `env.json` and `env.example.json`.
 
-The app ID is `com.documentcopilot.app` on both platforms (Android `applicationId` in `android/app/build.gradle.kts`, iOS bundle identifier in Xcode). `flutter create` generates `com.documentcopilot.document_copilot`, so it was changed by hand once; the Dart package name stays `document_copilot`.
+The app ID is `com.documentcopilot.app` and the display name is "Document Copilot" on every platform. `flutter create` generates its own defaults, so they were changed by hand once in: `android/app/build.gradle.kts`, `android/app/src/main/AndroidManifest.xml`, `ios/Runner.xcodeproj/project.pbxproj`, `macos/Runner/Configs/AppInfo.xcconfig`, `macos/Runner.xcodeproj/project.pbxproj`, `linux/CMakeLists.txt`, `windows/runner/Runner.rc`, `web/index.html` and `web/manifest.json`. If you add a platform later, set the same values there. The Dart package name stays `document_copilot`.
 
 ## Settings
 
