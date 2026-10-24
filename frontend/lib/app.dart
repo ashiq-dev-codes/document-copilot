@@ -2,6 +2,7 @@ import 'package:corextra/corextra.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:document_copilot/core/config/config.dart';
 import 'package:document_copilot/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:document_copilot/features/auth/presentation/pages/account_page.dart';
 import 'package:document_copilot/features/auth/presentation/pages/sign_in_page.dart';
@@ -16,8 +17,11 @@ class App extends StatelessWidget {
       title: 'Document Copilot',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(colorSchemeSeed: Colors.indigo),
-      // In debug builds, a floating button opens corextra's network and log inspector.
-      builder: (context, child) => CorextraDevToolsOverlay(child: child!),
+      // A floating button opens corextra's network and log inspector (see AppConfig).
+      builder: (context, child) => CorextraDevToolsOverlay(
+        enabled: AppConfig.isDevToolsEnabled,
+        child: child!,
+      ),
       home: const _AuthGate(),
     );
   }

@@ -1,6 +1,7 @@
 /// Starts the app: connects Supabase, registers dependencies, then shows the app.
 library;
 
+import 'package:corextra/corextra.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:document_copilot/core/config/config.dart';
 import 'package:document_copilot/injection_container.dart';
@@ -13,6 +14,7 @@ Future<void> main() async {
   // Must run first: it sets up the app's binding. Debug builds only.
   DevicePreview.enable(enabled: kDebugMode);
   WidgetsFlutterBinding.ensureInitialized();
+  CorextraDevTools.instance.enabled = AppConfig.isDevToolsEnabled;
 
   await Supabase.initialize(
     url: AppConfig.supabaseUrl,

@@ -10,7 +10,7 @@ This is the Flutter app for Document Copilot. It targets every Flutter platform 
 - **`dio`** for HTTP, through one shared client in `lib/core/network/`.
 - **`device_preview`** (3.x) to check screens on other device sizes, text scales and dark mode. Enabled with `DevicePreview.enable(enabled: kDebugMode)` as the first line of `main()`; it does nothing in release builds.
 - **`lucide_icons_flutter`** for every icon in the UI.
-- **`corextra`** (our own package) for the network logger, the in-app network/log inspector (`CorextraDevToolsOverlay`, debug builds only), extensions and form validators. Check it before writing a new helper.
+- **`corextra`** (our own package) for the network logger, the in-app network/log inspector (`CorextraDevToolsOverlay`; on only when `AppConfig.isDevToolsEnabled`: release tester builds with `DISTRIBUTION=firebase`, never store builds, never on web, where the browser's DevTools cover it), extensions and form validators. Check it before writing a new helper.
 - **`supabase_flutter`** for auth (email only — no Google sign-in, no SSO providers). It stores the session on the device.
 - Streaming answers come from FastAPI as Server-Sent Events, read with Dio (`ResponseType.stream`) and turned into a Dart `Stream`. No extra streaming package.
 
@@ -90,7 +90,8 @@ features/<name>/
 ## Configuration
 
 - All settings live in `AppConfig` (`lib/core/config/config.dart`), ZERO.40 style: the backend URL per `Environment` (`local`, `production`), the Supabase URL and the Supabase **publishable** key.
-- Pick the environment with `--dart-define=ENV=production`; plain `flutter run` uses `local`. `config.dart` is the only file allowed to call `String.fromEnvironment`.
+- Pick the environment with `--dart-define=ENV=production`; plain `flutter run` uses `local`.
+- Pick who a build is for with `--dart-define=DISTRIBUTION=firebase` (tester builds); the default is `store`. Store builds never show the in-app inspector. `config.dart` is the only file allowed to call `String.fromEnvironment`.
 - An environment without a value yet throws a clear `StateError` instead of falling back silently.
 - `config.dart` is committed and compiled into the app, so anyone can read it. Only public values belong there (the Supabase publishable key is designed for this; tables are protected by RLS). Never put a secret (OpenAI key, Supabase secret/service-role key) in the app.
 

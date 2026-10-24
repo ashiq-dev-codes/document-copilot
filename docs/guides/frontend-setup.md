@@ -26,6 +26,9 @@ cd frontend
 flutter run                                  # local backend (pick a device)
 flutter run -d chrome --web-port 3000        # web: fixed port so the backend's CORS allows it
 flutter run --dart-define=ENV=production     # deployed backend (after Phase 10)
+
+# Tester build with the in-app network inspector (release + DISTRIBUTION=firebase)
+flutter build apk --release --dart-define=ENV=production --dart-define=DISTRIBUTION=firebase
 ```
 
 ## Check
