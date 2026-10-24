@@ -40,7 +40,7 @@ class _AuthGate extends StatelessWidget {
       buildWhen: (previous, current) =>
           (previous is AuthSignedIn) != (current is AuthSignedIn),
       builder: (context, state) => switch (state) {
-        AuthSignedIn(:final email) => AccountPage(email: email),
+        AuthSignedIn() => const AccountPage(),
         _ => const SignInPage(),
       },
     );

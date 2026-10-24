@@ -41,10 +41,16 @@ abstract final class AppConfig {
       kReleaseMode && distribution == Distribution.firebase && !kIsWeb;
 
   static String get apiBaseUrl => switch (environment) {
-    // Your Mac's Wi-Fi IP: on a phone, localhost would mean the phone itself.
-    Environment.local => 'http://192.168.100.162:8000',
+    Environment.local => _localApiUrl,
     Environment.production => throw StateError(
       'Production API URL is added when the backend is deployed (Phase 10).',
     ),
   };
+
+  // Web and desktop run on this Mac, so localhost always works there. A phone or
+  // tablet needs the Mac's Wi-Fi IP (update it when you change networks).
+  static String get _localApiUrl =>
+      kIsWeb || defaultTargetPlatform == TargetPlatform.macOS
+      ? 'http://localhost:8000'
+      : 'http://192.168.2.30:8000';
 }
