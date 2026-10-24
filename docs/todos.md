@@ -341,6 +341,7 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 - [ ] 🤖 Railway: backend service with its environment variables
 - [ ] ✍️ Build the app and share it with testers (TestFlight / Firebase App Distribution), like your ZERO.40 tester builds
 - [ ] ✍️ Turn email confirmation back on in Supabase, with a link that opens the app
+- [ ] 🤝 Limit who can use the app: the publishable key is public by design, so restrict sign-ups (invite-only, or only the company email domain) and add backend rate limits, so strangers can't run up OpenAI costs
 - [ ] 🤝 Run migrations and ingestion against the production database
 - [ ] ✍️ Test everything with the installed app against the live backend
 
