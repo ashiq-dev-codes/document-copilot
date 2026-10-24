@@ -1,36 +1,40 @@
 import 'package:flutter/material.dart';
 
-/// The app's one snackbar style: `CustomSnackBar.error(context, e.message)`.
-abstract final class CustomSnackBar {
+class CustomSnackBar {
   static void show(
     BuildContext context,
-    String message, {
+    String title, {
     Color? backgroundColor,
-    Duration duration = const Duration(seconds: 3),
+    Duration duration = const Duration(seconds: 2),
   }) {
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: backgroundColor,
-          duration: duration,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        elevation: 1,
+        duration: duration,
+        content: Text(title),
+        backgroundColor: backgroundColor,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.only(bottom: 20, left: 10, right: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+      ),
+    );
   }
 
-  static void success(BuildContext context, String message) {
-    show(context, message, backgroundColor: Colors.green.shade700);
+  static void message(BuildContext context, String title) {
+    show(context, title, duration: const Duration(seconds: 5));
   }
 
-  /// Errors stay longer, so there's time to read them.
-  static void error(BuildContext context, String message) {
+  static void success(BuildContext context, String title) {
+    show(context, title, backgroundColor: Colors.green);
+  }
+
+  static void error(BuildContext context, String title) {
     show(
       context,
-      message,
-      backgroundColor: Theme.of(context).colorScheme.error,
-      duration: const Duration(seconds: 6),
+      title,
+      backgroundColor: Colors.red,
+      duration: const Duration(seconds: 7),
     );
   }
 }

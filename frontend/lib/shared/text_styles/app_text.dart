@@ -1,30 +1,21 @@
-import 'package:flutter/material.dart';
+import 'weights/black_text_styles.dart';
+import 'weights/bold_text_styles.dart';
+import 'weights/extra_bold_text_styles.dart';
+import 'weights/extra_light_text_styles.dart';
+import 'weights/light_text_styles.dart';
+import 'weights/medium_text_styles.dart';
+import 'weights/regular_text_styles.dart';
+import 'weights/semi_bold_text_styles.dart';
+import 'weights/thin_text_styles.dart';
 
-/// Text styles by font weight: `AppText.medium.textStyle(size: AppFontSize.s16)`.
-abstract final class AppText {
-  static const regular = AppTextStyle(FontWeight.w400);
-  static const medium = AppTextStyle(FontWeight.w500);
-  static const semiBold = AppTextStyle(FontWeight.w600);
-  static const bold = AppTextStyle(FontWeight.w700);
-}
-
-/// One font weight; [textStyle] builds the style with size, color and decoration.
-class AppTextStyle {
-  const AppTextStyle(this._weight);
-
-  final FontWeight _weight;
-
-  /// Leave [color] null to use the theme's text color (works in dark mode too).
-  TextStyle textStyle({
-    double? size,
-    Color? color,
-    TextDecoration? decoration,
-  }) {
-    return TextStyle(
-      fontSize: size,
-      fontWeight: _weight,
-      color: color,
-      decoration: decoration,
-    );
-  }
+class AppText {
+  static const extraLight = ExtraLightTextStyles();
+  static const thin = ThinTextStyles();
+  static const light = LightTextStyles();
+  static const regular = RegularTextStyles();
+  static const medium = MediumTextStyles();
+  static const semiBold = SemiBoldTextStyles();
+  static const bold = BoldTextStyles();
+  static const extraBold = ExtraBoldTextStyles();
+  static const black = BlackTextStyles();
 }
