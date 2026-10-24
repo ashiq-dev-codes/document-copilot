@@ -136,7 +136,7 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 
 **Frontend**
 
-- [ ] 🤖 Create the Flutter app in `frontend/` ([guide](guides/frontend-setup.md))
+- [x] 🤖 Create the Flutter app in `frontend/` ([guide](guides/frontend-setup.md))
 - [ ] ✍️ `core/config/env.dart` (reads `env.json`, fails fast) and Supabase init in `main.dart`
 - [ ] ✍️ `core/network/api_client.dart`: Dio with an interceptor that adds the Supabase token
 - [ ] ✍️ Sign-in and sign-up pages with an auth Cubit
