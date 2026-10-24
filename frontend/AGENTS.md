@@ -8,6 +8,7 @@ This is the Flutter app for Document Copilot. It targets every Flutter platform 
 - **`flutter_bloc`** — Cubits only, no `Bloc` event classes.
 - **`get_it`** for dependency injection.
 - **`dio`** for HTTP, through one shared client in `lib/core/network/`.
+- **`device_preview`** (3.x) to check screens on other device sizes, text scales and dark mode. Enabled with `DevicePreview.enable(enabled: kDebugMode)` as the first line of `main()`; it does nothing in release builds.
 - **`corextra`** (our own package) for the network logger, the in-app network/log inspector (`CorextraDevToolsOverlay`, debug builds only), extensions and form validators. Check it before writing a new helper.
 - **`supabase_flutter`** for auth (email only — no Google sign-in, no SSO providers). It stores the session on the device.
 - Streaming answers come from FastAPI as Server-Sent Events, read with Dio (`ResponseType.stream`) and turned into a Dart `Stream`. No extra streaming package.
