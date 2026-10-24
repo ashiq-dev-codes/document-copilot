@@ -20,6 +20,6 @@ abstract final class AppConfig {
 
   // The publishable key is meant to ship inside apps; the tables are protected by RLS.
   static const supabaseUrl = 'https://nkhwcvjauhzmdsdphvqw.supabase.co';
-  static const supabaseAnonKey =
+  static const supabasePublishableKey =
       'sb_publishable_87DQChhVoWpOGLzgbCFYOw_xaK89bV_';
 }
