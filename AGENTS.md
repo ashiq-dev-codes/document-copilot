@@ -33,9 +33,9 @@ Both services organize code **by feature** (documents, retrieval, assistant, cha
 
 | Layer | Job | Backend (FastAPI) | Frontend (Flutter) |
 | --- | --- | --- | --- |
-| Presentation | HTTP or UI only, kept thin | `router.py` | `presentation/pages/`, `presentation/widgets/` |
-| Logic | The feature's use cases and business rules | `service.py`, plus pure rule modules (`chunker.py`, `fusion.py`, `grounding.py`) | `presentation/cubit/` (Cubits) |
-| Data access | Talks to the outside world (database, OpenAI, backend API) | `repository.py` | `data/` (repository) |
+| Presentation | HTTP or UI only, kept thin | `routers/` | `presentation/pages/`, `presentation/widgets/` |
+| Logic | The feature's use cases and business rules | `services/`, plus pure rules in `rules/` (`chunker.py`, `fusion.py`, `grounding.py`) | `presentation/cubit/` (Cubits) |
+| Data access | Talks to the outside world (database, OpenAI, backend API) | `repositories/` | `data/` (repository) |
 | Models | The shapes of the data | `schemas/` (Pydantic, one per file), `models/` (SQLAlchemy tables, one per file) | `models/` (one model per file) |
 
 Rules:
@@ -44,7 +44,7 @@ Rules:
 - **Pure rules stay pure:** chunking, rank fusion and citation checks take data in and return data out, with no I/O, so they're unit-testable without a database or the LLM.
 - **No interfaces or abstract base classes by default.** Python duck typing and Dart's implicit interfaces (any class can be `implements`-ed) let a test pass a fake with the same methods. Add a `Protocol` / abstract class only when a second real implementation exists.
 - **Only the files a feature needs.** No empty files or placeholder folders.
-- **Features don't import each other's data access** (`repository.py`, `data/`). Use the other feature's service or Cubit instead.
+- **Features don't import each other's data access** (`repositories/`, `data/`). Use the other feature's service or Cubit instead.
 - **Shared code only** in `backend/app/core/`, `frontend/lib/core/` (app setup: config, HTTP client) and `frontend/lib/shared/` (reusable building blocks: text styles, widgets, utils). No feature logic there.
 
 ## Dependency policy
@@ -90,4 +90,4 @@ Fail fast on startup if required config is missing. No silent fallbacks that hid
   - Every file starts with a one-line description of its job (Python: module docstring; Dart: `///` on the main class).
   - Every public class and function gets a one-line description of what it's for.
   - Inline comments explain *why*, never *what*. Remove stale TODOs.
-- **Keep files focused.** Prefer small modules. In folders, things that multiply (tables, schemas, models) get a folder with one class per file; things that are one-per-feature (router, service, repository) stay a single file.
+- **Keep files focused.** Prefer small modules. Every layer of a feature is its own folder with one class per file, even when it holds a single file.

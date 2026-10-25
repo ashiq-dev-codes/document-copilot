@@ -2,10 +2,10 @@
 
 import uuid
 
-from pydantic import BaseModel
+from app.core.schemas import ApiSchema
 
 
-class UserResponse(BaseModel):
+class UserResponse(ApiSchema):
     """The signed-in user, as returned by GET /auth/me."""
 
     id: uuid.UUID

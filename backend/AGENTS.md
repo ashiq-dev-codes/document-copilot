@@ -50,23 +50,25 @@ backend/
 └── pyproject.toml
 ```
 
-Inside each feature, one flat folder (only the files it needs):
+Inside each feature, **every layer is its own folder** (only the folders it needs):
 
 ```text
 app/features/<feature>/
-├── router.py        # FastAPI APIRouter: thin, validates input, calls the service
-├── schemas/         # Pydantic models: one file per schema (user_response.py), __init__.py re-exports them
-├── models/          # SQLAlchemy tables: one file per table (chat_thread.py), __init__.py re-exports them
-├── service.py       # Use cases: the feature's logic (like a Cubit)
-├── repository.py    # Database queries for this feature's tables
-├── dependencies.py  # FastAPI Depends functions that build the service and repository
-└── <rule>.py        # Pure business rules, e.g. chunker.py, fusion.py, grounding.py
+├── routers/         # chat_router.py: FastAPI APIRouter, thin, validates input, calls the service
+├── schemas/         # Pydantic models, one per file (thread_response.py)
+├── models/          # SQLAlchemy tables, one per file (chat_thread.py)
+├── services/        # chat_service.py: use cases, the feature's logic (like a Cubit)
+├── repositories/    # chat_repository.py: database queries for this feature's tables
+├── dependencies/    # chat_dependencies.py: Depends functions that build the service and repository
+├── exceptions/      # chat_exceptions.py: the feature's HTTP errors (ThreadNotFound -> 404)
+└── rules/           # Pure business rules, one per file: chunker.py, fusion.py, grounding.py
 ```
 
-- **Things that multiply get a folder; things that are one-per-feature stay a file.** `models/` and `schemas/` are folders with one class per file; `router.py`, `service.py`, `repository.py` and `dependencies.py` are single files. Split a single file only when it grows too long.
+- **Every layer is a folder, even with one file in it.** Files are named `<feature>_<layer>.py` (`chat_service.py`); `models/` and `schemas/` are named after the class (`chat_thread.py`). One class per file.
+- **Each folder's `__init__.py` re-exports its public names** and lists them in `__all__`, so imports stay short: `from app.features.chat.services import ChatService`.
 - Pydantic for data crossing a boundary (HTTP, LLM output, settings); dataclasses for internal data.
 - The service receives its repository as a constructor argument, so a unit test can pass a fake one. No `Protocol` unless two real implementations exist.
-- Unit tests target pure rule modules and `service.py`; `repository.py` is covered by integration tests.
+- Unit tests target `rules/` and `services/`; `repositories/` are covered by integration tests.
 
 ## Code style (backend-specific)
 
@@ -74,6 +76,7 @@ app/features/<feature>/
 - **Async by default in request-path code.** Don't run blocking I/O on the event loop. Tempfile + small synchronous file reads are OK (they're fast); network calls must be async.
 - **Use `async def` for all route handlers** and any I/O service function.
 - **Validate at boundaries only.** HTTP input is validated by Pydantic models. External API responses are validated when parsed. Internal callers are trusted.
+- **JSON is camelCase.** Every schema extends `ApiSchema` (`app/core/schemas.py`): Python fields stay snake_case, the app sees camelCase (`created_at` -> `createdAt`), and schemas can be built from rows with `Model.model_validate(row)`.
 - **Typed responses, no envelope.** Every endpoint returns a Pydantic model from the feature's `schemas/` folder (e.g. `-> UserResponse`), never a bare `dict`. The HTTP status code says success or failure.
 - **Errors:** `raise HTTPException(status_code, "message")`; the app reads `{"detail": "..."}`. Add a machine-readable `code` only when the app must react differently to different errors.
 - **Protected endpoints** take `user: CurrentUserDep` (from `app.core.auth`); never read the `Authorization` header by hand.
@@ -98,7 +101,7 @@ app/features/<feature>/
 - **Prefer unit over integration.** Mock at the service boundary.
 - Fast suite (`pytest -m "not integration"`) must stay green and hit no network / no DB.
 - Integration tests go behind `@pytest.mark.integration` and may require live OpenAI / Supabase credentials.
-- Tests mirror the app layout (`app/features/retrieval/fusion.py` → `tests/features/retrieval/test_fusion.py`).
+- Tests mirror the app layout (`app/features/retrieval/rules/fusion.py` → `tests/features/retrieval/test_fusion.py`).
 - Required test coverage: ingestion logic, retrieval, citation extraction, grounding enforcement.
 
 ## Anti-patterns (rejected)

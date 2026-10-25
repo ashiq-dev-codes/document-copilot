@@ -150,31 +150,31 @@ backend/app/
     ├── documents/
     │   ├── schemas/                 # SourceDocument, Chunk
     │   ├── models/                  # source_document.py, document_chunk.py (one table per file)
-    │   ├── chunker.py               # Pure chunking rules (size, overlap, page/section metadata)
-    │   ├── repository.py            # Store and read documents, chunks, embeddings
-    │   └── service.py               # Ingestion: parse → chunk → embed → store
+    │   ├── rules/chunker.py         # Pure chunking rules (size, overlap, page/section metadata)
+    │   ├── repositories/            # documents_repository.py: store and read documents, chunks, embeddings
+    │   └── services/                # documents_service.py: ingestion, parse → chunk → embed → store
     ├── retrieval/
     │   ├── schemas/                 # SourcePassage
-    │   ├── fusion.py                # Pure Reciprocal Rank Fusion
-    │   ├── repository.py            # pgvector and full-text SQL queries, neighbor chunks
-    │   └── service.py               # Query → fused, ranked source passages
+    │   ├── rules/fusion.py          # Pure Reciprocal Rank Fusion
+    │   ├── repositories/            # retrieval_repository.py: pgvector and full-text SQL, neighbor chunks
+    │   └── services/                # retrieval_service.py: query → fused, ranked source passages
     ├── assistant/
     │   ├── schemas/                 # GroundedAnswer, Citation, DocumentAgentDeps
-    │   ├── grounding.py             # Pure check: every citation maps to a retrieved passage
-    │   ├── agent.py                 # PydanticAI agent definition and tools
-    │   ├── instructions.md          # System instructions and product contract
-    │   └── service.py               # Run the agent, then enforce grounding
+    │   ├── rules/grounding.py       # Pure check: every citation maps to a retrieved passage
+    │   ├── agents/                  # assistant_agent.py (PydanticAI agent and tools) + instructions.md
+    │   └── services/                # assistant_service.py: run the agent, then enforce grounding
     └── chat/
         ├── schemas/                 # Request bodies, thread and message responses, stream events
         ├── models/                  # chat_thread.py, chat_message.py, message_citation.py
-        ├── repository.py            # Threads, messages, citation records
-        ├── service.py               # One chat turn: retrieve → assistant → stream → persist
-        ├── streaming.py             # Formats Server-Sent Events (text, citations, done, error)
-        ├── dependencies.py          # FastAPI Depends functions that build services
-        └── router.py                # Thread CRUD and POST /chat/stream
+        ├── exceptions/              # chat_exceptions.py: ThreadNotFound (404), ThreadForbidden (403)
+        ├── rules/streaming.py       # Formats Server-Sent Events (text, citations, done, error)
+        ├── repositories/            # chat_repository.py: threads, messages, citation records
+        ├── services/                # chat_service.py: one chat turn, retrieve → assistant → stream → persist
+        ├── dependencies/            # chat_dependencies.py: Depends functions that build services
+        └── routers/                 # chat_router.py: thread CRUD and POST /chat/stream
 ```
 
-Features follow the product workflow. `chat/service.py` owns the full turn lifecycle, `assistant/` owns the LLM boundary and the trust contract that answers must cite retrieved evidence, `retrieval/` owns hybrid source-passage search, and `documents/` owns ingestion. Pure rules (`chunker.py`, `fusion.py`, `grounding.py`) take data in and return data out, so they can be unit-tested without a database or the LLM.
+Features follow the product workflow. `chat/services/` owns the full turn lifecycle, `assistant/` owns the LLM boundary and the trust contract that answers must cite retrieved evidence, `retrieval/` owns hybrid source-passage search, and `documents/` owns ingestion. Pure rules (`rules/chunker.py`, `rules/fusion.py`, `rules/grounding.py`) take data in and return data out, so they can be unit-tested without a database or the LLM.
 
 The agent should receive explicit dependencies rather than reaching into globals:
 
@@ -242,8 +242,8 @@ Recommended backend units:
 
 - `app/core/auth.py` validates bearer tokens and exposes `get_current_user`.
 - `app/core/database.py` creates user-scoped and admin Supabase clients.
-- `app/features/chat/repository.py` stores and reads chat threads, messages, and citation records.
-- `app/features/documents/repository.py` stores and reads source documents, chunks, embeddings, and full-text search data.
+- `app/features/chat/repositories/` stores and reads chat threads, messages, and citation records.
+- `app/features/documents/repositories/` stores and reads source documents, chunks, embeddings, and full-text search data.
 
 ## Streaming Contract
 

@@ -167,10 +167,10 @@ Rule of thumb: setup and plumbing are 🤖; the AI core is ✍️. Stuck on a �
 
 **Backend**
 
-- [ ] 🤖 Chat threads: list them, create one, load its history
+- [x] 🤖 Chat threads: list them, create one, load its history
 - [ ] 🤝 `POST /chat/stream`: streams a fake reply word by word
 - [ ] 🤖 Save the user's message and the reply after the stream ends
-- [ ] 🤝 Return `403` when someone opens another user's thread
+- [x] 🤝 Return `403` when someone opens another user's thread
 
 **Frontend**
 

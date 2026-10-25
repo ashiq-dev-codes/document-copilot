@@ -5,7 +5,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from app.core.config import settings
-from app.features.auth.router import router as auth_router
+from app.features.auth.routers import router as auth_router
+from app.features.chat.routers import router as chat_router
 
 
 class HealthResponse(BaseModel):
@@ -25,6 +26,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(chat_router)
 
 
 @app.get("/health")
